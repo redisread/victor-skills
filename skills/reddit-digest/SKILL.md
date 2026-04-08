@@ -16,8 +16,8 @@ description: |
 | `--base-dir` | `REDDIT_DIGEST_BASE_DIR` | `/Users/victor/Desktop/resource/daily-info/reddit` |
 | `--subreddit` | `REDDIT_DIGEST_SUBREDDIT` | `ClaudeAI` |
 
-输出路径：`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}-{YYYYMMDD}.md`
-临时目录：`{BASE_DIR}/{YYYYMMDD}/temp/`
+输出路径：`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}/{subreddit_name}-{YYYYMMDD}.md`
+临时目录：`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}/temp/`
 
 ## 依赖
 
@@ -29,13 +29,13 @@ description: |
 ### Step 1: 初始化
 
 1. 确定 `BASE_DIR` 和 `SUBREDDIT`
-2. 若 `{BASE_DIR}/{YYYYMMDD}/` 已存在则清空
+2. 若 `{BASE_DIR}/{YYYYMMDD}/{subreddit_name}/` 不存在则创建
 3. `mkdir -p {TEMP_DIR}`
 
 ### Step 2: 获取 Post 列表
 
 ```bash
-autocli reddit subreddit {subreddit_name} --sort top --time day --format json
+autocli reddit subreddit {subreddit_name} --limit 50 --sort top --time day --format json
 ```
 
 返回字段：`author`, `comments`, `title`, `upvotes`, `url`
@@ -46,13 +46,13 @@ autocli reddit subreddit {subreddit_name} --sort top --time day --format json
 autocli reddit read {post_url} -f json
 ```
 
-返回字段：`author`, `score`, `text`, `type`（L0=原文，L1+=评论）
+返回字段：`author`, `score`, `text`, `type`（'POST'=原文，'L0'=评论）
 
 **容错顺序**：autocli read → autocli 动态判断 → agent-browser → 仅用列表元数据生成简要摘要
 
 ### Step 4: 分析每个 Post
 
-将分析结果写入 `{TEMP_DIR}/{subreddit_name}-{rank}-{sanitized_title}.md`，筛选并剔除低价值 Post。
+将分析结果写入 `{TEMP_DIR}/{rank}-{sanitized_title}.md`，筛选并剔除低价值 Post。
 
 输出文档结构与筛选规则见 [references/output-template.md](references/output-template.md)。
 

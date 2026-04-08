@@ -2,7 +2,7 @@
 
 ## 输出文件路径
 
-`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}-{YYYYMMDD}.md`
+`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}/{subreddit_name}-{YYYYMMDD}.md`
 
 ## 文档结构
 
