@@ -1,180 +1,61 @@
 ---
 name: reddit-digest
 description: |
-  获取指定单个 Subreddit 最近 24 小时热门内容摘要。对热门 Post 逐一总结、提炼核心要点、给出可实践建议、灵感启发，以及生成社交媒体分享文案。
+  抓取指定单个 Subreddit 最近 24 小时热门 Post，逐一获取详情与评论，生成摘要、核心要点、可实践建议、灵感启发及社交媒体分享文案，输出为每日精选 Markdown 文档。
+  当用户说"帮我抓取/总结 Reddit r/xxx"、"生成 Reddit 每日摘要"、"reddit digest"时使用。
 ---
 
-# Reddit Subreddit 每日摘要技能
-
-获取指定单个 Subreddit 最近 24 小时热门 Post，逐一抓取 Post 详情（含评论），生成摘要、核心要点、可实践建议、灵感启发及社交媒体分享文案，输出为一篇每日精选文档。
+# Reddit Subreddit 每日摘要
 
 ## 配置
 
-| 配置方式 | 优先级 | 示例 |
-|---------|--------|------|
-| 命令行参数 `--base-dir` | 最高 | `/reddit-digest --base-dir /tmp/reddit` |
-| 环境变量 `REDDIT_DIGEST_BASE_DIR` | 中 | `export REDDIT_DIGEST_BASE_DIR=...` |
-| 默认值 | 最低 | `/Users/victor/Desktop/resource/daily-info/reddit` |
+优先级：命令行参数 > 环境变量 > 默认值
 
-| 配置方式 | 优先级 | 示例 |
-|---------|--------|------|
-| 命令行参数 `--subreddit` | 最高 | `/reddit-digest --subreddit openclaw` |
-| 环境变量 `REDDIT_DIGEST_SUBREDDIT` | 中 | `export REDDIT_DIGEST_SUBREDDIT=openclaw` |
-| 默认值 | 最低 | `ClaudeAI` |
+| 参数 | 环境变量 | 默认值 |
+|------|---------|--------|
+| `--base-dir` | `REDDIT_DIGEST_BASE_DIR` | `/Users/victor/Desktop/resource/daily-info/reddit` |
+| `--subreddit` | `REDDIT_DIGEST_SUBREDDIT` | `ClaudeAI` |
 
-路径规则（`{YYYYMMDD}` 为当天日期）：
-- 临时目录：`{BASE_DIR}/{YYYYMMDD}/temp/`
-- 输出文档：`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}-{YYYYMMDD}.md`
+输出路径：`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}-{YYYYMMDD}.md`
+临时目录：`{BASE_DIR}/{YYYYMMDD}/temp/`
 
 ## 依赖
 
-- **autocli**: 获取 Reddit Subreddit 热门列表和 Post 详情
-- **agent-browser**: 容错备用，当 autocli 无法获取内容时使用
+- **autocli**：获取热门列表和 Post 详情
+- **agent-browser**：容错备用
 
 ## 执行流程
 
 ### Step 1: 初始化
 
-1. 按优先级确定 `BASE_DIR`（参数 > 环境变量 > 默认值）
-2. 按优先级确定 `SUBREDDIT`（参数 > 环境变量 > 默认值）
-3. 获取当天日期，计算 `TEMP_DIR` 和输出文件路径
-4. **检查并清理已存在文件**：
-   - 检查 `{BASE_DIR}/{YYYYMMDD}/` 目录下是否有文件
-   - 如果存在，先清空该目录下所有内容
-5. `mkdir -p {TEMP_DIR}`
+1. 确定 `BASE_DIR` 和 `SUBREDDIT`
+2. 若 `{BASE_DIR}/{YYYYMMDD}/` 已存在则清空
+3. `mkdir -p {TEMP_DIR}`
 
-### Step 2: 处理 Subreddit
-
-#### Step 2.1: 获取 Subreddit 热门 Post 列表
+### Step 2: 获取 Post 列表
 
 ```bash
 autocli reddit subreddit {subreddit_name} --sort top --time day --format json
 ```
 
-返回格式：
-```json
-[
-  {
-    "author": "enthusiast_bob",
-    "comments": 10,
-    "title": "Opinion from those who have used both OpenClaw and Paperclip ?",
-    "upvotes": 6,
-    "url": "https://www.reddit.com/r/openclaw/comments/1sdgngk/opinion_from_those_who_have_used_both_openclaw/"
-  }
-]
-```
+返回字段：`author`, `comments`, `title`, `upvotes`, `url`
 
-#### Step 2.2: 逐一获取 Post 详情
-
-对列表中的每个 Post URL，执行：
+### Step 3: 逐一获取 Post 详情
 
 ```bash
 autocli reddit read {post_url} -f json
 ```
 
-返回格式（包含 Post 原文和评论）：
-```json
-[
-  {
-    "author": "trewert_77",
-    "score": 2,
-    "text": "...",
-    "type": "L0"
-  },
-  {
-    "author": "enthusiast_bob",
-    "score": 1,
-    "text": "...",
-    "type": "L1"
-  }
-]
-```
+返回字段：`author`, `score`, `text`, `type`（L0=原文，L1+=评论）
 
-**容错机制**：
-- 如果 `autocli reddit read` 失败或返回空内容，尝试使用 `autocli` 动态判断 URL 类型重新获取
-- 如果仍然失败，使用 **agent-browser** 技能访问该 URL 获取内容
-- 如果所有方式都失败，记录该 Post 为"无法获取详情"，仅使用列表中的标题和元数据生成简要摘要
+**容错顺序**：autocli read → autocli 动态判断 → agent-browser → 仅用列表元数据生成简要摘要
 
-#### Step 2.3: 分析并生成每个 Post 的摘要
+### Step 4: 分析每个 Post
 
-对每个 Post，结合列表元数据（title, upvotes, comments, author）和详情内容，按以下模板生成分析，写入临时文件 `{TEMP_DIR}/{subreddit_name}-{rank}-{sanitized_title}.md`：
+将分析结果写入 `{TEMP_DIR}/{subreddit_name}-{rank}-{sanitized_title}.md`，筛选并剔除低价值 Post。
 
-**Post 分析模板：**
+输出文档结构与筛选规则见 [references/output-template.md](references/output-template.md)。
 
-```markdown
-### [序号]. [Post 标题]
+### Step 5: 汇总输出
 
-> 链接：[url]
-> 👍 [upvotes] | 💬 [comments] | 作者：[author]
-
-#### 摘要
-3-5 句话总结 Post 内容及评论区核心讨论，准确、信息密度高。
-
-#### 核心要点
-- （3-5 个关键要点，综合 Post 原文和高质量评论）
-
-#### 可实践建议
-2-3 条可立即付诸行动的具体建议。
-
-#### 灵感启发
-思维模型、跨领域启发、值得深入探索的方向。1-2 段。
-
-#### 社交媒体分享文案
-
-**即刻：**
-口语化、有观点、适度 emoji、200 字以内，含 #Reddit热门 #{subreddit_name}
-
-**小红书：**
-标题党风格标题 + 正文，善用 emoji，300 字以内，带话题标签
-
-**Twitter/X：**
-使用简体中文, 简洁有力，280 字符以内，带 hashtag
-```
-
-**筛选规则**：在分析过程中，对以下类型的 Post 标记为"低价值"并从最终文档中剔除：
-- 纯 meme / 表情包 / 无实质讨论
-- 重复 / 搬运无原创观点
-- 评论区无有效互动（如全是 bot 回复）
-- 内容过于琐碎（如"大家好我是新人"类）
-
-对被剔除的 Post，在临时文件中记录标题和剔除原因，不写入最终文档。
-
-#### Step 2.4: 汇总生成输出文档
-
-读取该 Subreddit 的所有临时文件，按 rank 排序合并，写入 `{BASE_DIR}/{YYYYMMDD}/{subreddit_name}-{YYYYMMDD}.md`：
-
-```markdown
----
-title: "r/{subreddit_name} 每日精选 - {YYYY-MM-DD}"
-date: {ISO 8601}
-description: "r/{subreddit_name} 最近 24 小时热门 Post 摘要与深度解读"
-tags:
-  - Reddit
-  - {subreddit_name}
-  - Daily Digest
-categories:
-  - 技术
----
-
-# r/{subreddit_name} 每日精选 - {YYYY-MM-DD}
-
-> 本文精选 r/{subreddit_name} 最近 24 小时热门 Post，为每篇提供摘要、核心要点、可实践建议、灵感启发及社交媒体分享文案。
-
----
-
-{按 rank 顺序合并所有有价值 Post 的分析内容}
-
----
-
-## 小结
-
-（该 Subreddit 今日整体观察：社区热议话题、共同趋势、值得关注的讨论方向。3-5 句话。）
-```
-
-## 注意事项
-
-1. **容错**：URL 不可访问时，先使用 autocli 动态判断获取 URL 对应内容，如果还是不行使用 agent-browser 获取内容
-2. **语言**：中文撰写
-3. **文案风格**：即刻轻松有态度、小红书吸睛有干货、Twitter 简洁专业，一律使用简体中文
-4. **筛选机制**：剔除低价值 Post，确保最终文档信息密度高
-5. **清理机制**：执行前检查并清空当日目录，避免残留数据干扰
+读取所有临时文件，按 rank 排序合并，写入最终文档。所有内容**使用简体中文撰写**。
