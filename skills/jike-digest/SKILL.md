@@ -29,7 +29,7 @@ description: |
 | 薅羊毛小分队 | 5523d164e4b0466c6563cd30 |
 | 科技圈大小事 | 597ae4ac096cde0012cf6c06 |
 
-输出路径：`{BASE_DIR}/{YYYYMMDD}/jike-{topic_name}-{YYYYMMDD}.md`
+输出路径：`{BASE_DIR}/{topic_id}/{YYYYMMDD}/jike-{topic_name}-{YYYYMMDD}.md`
 
 ## 依赖
 
@@ -40,8 +40,8 @@ description: |
 ### Step 1: 初始化
 
 1. 确定 `TOPIC_ID` 和 `BASE_DIR`
-2. 若 `{BASE_DIR}/{YYYYMMDD}/` 已存在则清空与当前 topic 相关文件
-3. `mkdir -p {BASE_DIR}/{YYYYMMDD}`
+2. 若 `{BASE_DIR}/{topic_id}/{YYYYMMDD}/` 已存在则清空与当前 topic 相关文件
+3. `mkdir -p {BASE_DIR}/{topic_id}/{YYYYMMDD}`
 
 ### Step 2: 获取内容
 

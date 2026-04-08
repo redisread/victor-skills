@@ -2,7 +2,7 @@
 
 ## 输出文件路径
 
-`{BASE_DIR}/{YYYYMMDD}/jike-{topic_name}-{YYYYMMDD}.md`
+`{BASE_DIR}/{topic_id}/{YYYYMMDD}/jike-{topic_name}-{YYYYMMDD}.md`
 
 ## 文档结构
 
