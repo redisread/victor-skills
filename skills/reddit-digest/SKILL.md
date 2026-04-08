@@ -22,40 +22,54 @@ description: |
 ## 依赖
 
 - **autocli**：获取热门列表和 Post 详情
-- **agent-browser**：容错备用
+- **scripts/fetch_post_details.py**：批量并发获取所有 Post 详情，保存到临时目录
 
 ## 执行流程
 
 ### Step 1: 初始化
 
-1. 确定 `BASE_DIR` 和 `SUBREDDIT`
-2. 若 `{BASE_DIR}/{YYYYMMDD}/{subreddit_name}/` 不存在则创建
-3. `mkdir -p {TEMP_DIR}`
-
-### Step 2: 获取 Post 列表
+确定 `BASE_DIR` 和 `SUBREDDIT`，创建输出目录和临时目录：
 
 ```bash
-autocli reddit subreddit {subreddit_name} --limit 50 --sort top --time day --format json
+mkdir -p {BASE_DIR}/{YYYYMMDD}/{subreddit_name}/temp
 ```
 
-返回字段：`author`, `comments`, `title`, `upvotes`, `url`
+### Step 2: 批量获取 Post 列表与详情
 
-### Step 3: 逐一获取 Post 详情
+一条命令完成列表获取 + 批量详情抓取：
 
 ```bash
-autocli reddit read {post_url} -f json
+autocli reddit subreddit {subreddit_name} --limit 50 --sort top --time day --format json | \
+  python3 {SKILL_DIR}/scripts/fetch_post_details.py --temp-dir {TEMP_DIR}
 ```
 
-返回字段：`author`, `score`, `text`, `type`（'POST'=原文，'L0'=评论）
+脚本**串行**调用 `autocli reddit read {url} -f json` 逐条抓取（autocli 基于浏览器，并发会导致 tab 冲突，默认 workers=1），每条 Post 保存为：
 
-**容错顺序**：autocli read → autocli 动态判断 → agent-browser → 仅用列表元数据生成简要摘要
+```
+{TEMP_DIR}/{rank:02d}-{sanitized_title}.json
+```
 
-### Step 4: 分析每个 Post
+每个文件结构：
 
-将分析结果写入 `{TEMP_DIR}/{rank}-{sanitized_title}.md`，筛选并剔除低价值 Post。
+```json
+{
+  "rank": 1,
+  "meta": { "author", "comments", "title", "upvotes", "url" },
+  "content": [ { "author", "score", "text", "type" }, ... ],
+  "error": null
+}
+```
+
+`content` 字段：`type=POST` 为原文，`type=L0` 为顶层评论，`type=L1` 为回复。
+
+**容错**：抓取失败时 `error` 字段记录原因，仅用 `meta` 元数据生成简要摘要。
+
+### Step 3: 分析每个 Post
+
+逐一读取 `{TEMP_DIR}/*.json`，按 rank 顺序分析，筛选并剔除低价值 Post。
 
 输出文档结构与筛选规则见 [references/output-template.md](references/output-template.md)。
 
-### Step 5: 汇总输出
+### Step 4: 汇总输出
 
-读取所有临时文件，按 rank 排序合并，写入最终文档。所有内容**使用简体中文撰写**。
+将所有分析结果按 rank 排序合并，写入最终文档。所有内容**使用简体中文撰写**。
