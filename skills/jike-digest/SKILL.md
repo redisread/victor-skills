@@ -1,7 +1,7 @@
 ---
 name: jike-digest
 description: |
-  抓取指定即刻 Topic 最近 20 条内容，筛选有价值的 post，生成摘要、可实践建议、灵感启发，输出为每日精选 Markdown 文档。
+  抓取指定即刻 Topic 最近 50 条内容，筛选最近 24 小时内有价值的 post，生成摘要、可实践建议、灵感启发，输出为每日精选 Markdown 文档。
   当用户说"帮我总结即刻 topic"、"即刻日报"、"jike digest"、"jike 摘要"、"即刻每日精选"、"抓取即刻 {topic_id}"时使用。
 ---
 
@@ -34,6 +34,7 @@ description: |
 ## 依赖
 
 - **autocli**：获取 Topic 内容
+- **scripts/filter_recent.py**：过滤最近 24 小时内的 posts
 
 ## 执行流程
 
@@ -43,15 +44,26 @@ description: |
 2. 若 `{BASE_DIR}/{topic_id}/{YYYYMMDD}/` 已存在则清空与当前 topic 相关文件
 3. `mkdir -p {BASE_DIR}/{topic_id}/{YYYYMMDD}`
 
-### Step 2: 获取内容
+### Step 2: 获取并过滤内容
 
 ```bash
-autocli jike topic {topic_id} --limit 20 -f json
+autocli jike topic {topic_id} --limit 50 -f json | python3 {SKILL_DIR}/scripts/filter_recent.py
+```
+
+脚本将统计信息输出到 stderr，过滤后的 JSON 数组输出到 stdout。也可单独调用：
+
+```bash
+# 自定义时间窗口（如 48 小时）
+python3 {SKILL_DIR}/scripts/filter_recent.py --input posts.json --hours 48
+
+# 保存过滤结果到文件
+autocli jike topic {topic_id} --limit 50 -f json | python3 {SKILL_DIR}/scripts/filter_recent.py --output filtered.json
 ```
 
 ### Step 3: 筛选与分析
 
-剔除低价值内容，对保留的 post 逐条生成分析。输出格式见 [references/output-template.md](references/output-template.md)。
+1. **低价值剔除**：对 Step 2 结果，进一步剔除纯表情、纯图片无文字、明显低质量、过于私人化的内容
+2. 对保留的 post 逐条生成分析。输出格式见 [references/output-template.md](references/output-template.md)。
 
 ### Step 4: 写入文档
 
