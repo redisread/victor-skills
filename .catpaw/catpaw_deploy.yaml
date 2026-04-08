@@ -1,0 +1,8 @@
+type: webstatic
+name: victor-skills
+description: Victor's Claude Code Skill Collection
+build:
+  command: echo "No build needed for skills"
+  output: .
+deploy:
+  command: echo "Deploying skills collection"
