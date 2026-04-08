@@ -133,6 +133,7 @@ def main():
     success_paths = []
     failed = 0
 
+    completed_count = 0
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {
             executor.submit(fetch_detail, rank + 1, post, args.temp_dir): rank
@@ -140,10 +141,13 @@ def main():
         }
         for future in as_completed(futures):
             rank, output_path, error = future.result()
+            completed_count += 1
             if error:
                 failed += 1
+                print(f"[PROGRESS] {completed_count}/{total} 完成（rank={rank} 失败: {error}）", file=sys.stderr)
             else:
                 success_paths.append((rank, output_path))
+                print(f"[PROGRESS] {completed_count}/{total} 完成（rank={rank} 成功）", file=sys.stderr)
 
     # 按 rank 排序后输出路径到 stdout
     success_paths.sort(key=lambda x: x[0])
