@@ -1,12 +1,12 @@
 ---
 name: reddit-digest
 description: |
-  获取 Reddit Subreddit 每日热门内容摘要。对每个配置的 Subreddit 最近 24 小时热门 Post 逐一总结、提炼核心要点、给出可实践建议、灵感启发，以及生成社交媒体分享文案。
+  获取指定单个 Subreddit 最近 24 小时热门内容摘要。对热门 Post 逐一总结、提炼核心要点、给出可实践建议、灵感启发，以及生成社交媒体分享文案。
 ---
 
 # Reddit Subreddit 每日摘要技能
 
-获取配置的多个 Subreddit 最近 24 小时热门 Post，逐一抓取 Post 详情（含评论），生成摘要、核心要点、可实践建议、灵感启发及社交媒体分享文案，按 Subreddit 维度输出文档，最终合并为一篇每日精选文档。
+获取指定单个 Subreddit 最近 24 小时热门 Post，逐一抓取 Post 详情（含评论），生成摘要、核心要点、可实践建议、灵感启发及社交媒体分享文案，输出为一篇每日精选文档。
 
 ## 配置
 
@@ -18,14 +18,13 @@ description: |
 
 | 配置方式 | 优先级 | 示例 |
 |---------|--------|------|
-| 命令行参数 `--subreddits` | 最高 | `/reddit-digest --subreddits openclaw,codex` |
-| 环境变量 `REDDIT_DIGEST_SUBREDDITS` | 中 | `export REDDIT_DIGEST_SUBREDDITS=openclaw,codex` |
-| 默认值 | 最低 | `openclaw,ClaudeAI` |
+| 命令行参数 `--subreddit` | 最高 | `/reddit-digest --subreddit openclaw` |
+| 环境变量 `REDDIT_DIGEST_SUBREDDIT` | 中 | `export REDDIT_DIGEST_SUBREDDIT=openclaw` |
+| 默认值 | 最低 | `ClaudeAI` |
 
 路径规则（`{YYYYMMDD}` 为当天日期）：
 - 临时目录：`{BASE_DIR}/{YYYYMMDD}/temp/`
-- Subreddit 维度文档：`{BASE_DIR}/{YYYYMMDD}/subreddit/{subreddit_name}.md`
-- 最终合并文档：`{BASE_DIR}/{YYYYMMDD}/reddit-daily-{YYYYMMDD}.md`
+- 输出文档：`{BASE_DIR}/{YYYYMMDD}/{subreddit_name}-{YYYYMMDD}.md`
 
 ## 依赖
 
@@ -37,16 +36,14 @@ description: |
 ### Step 1: 初始化
 
 1. 按优先级确定 `BASE_DIR`（参数 > 环境变量 > 默认值）
-2. 按优先级确定 `SUBREDDITS` 列表（参数 > 环境变量 > 默认值），以逗号分隔
-3. 获取当天日期，计算 `TEMP_DIR`、`SUBREDDIT_DIR`、`OUTPUT_DIR`
+2. 按优先级确定 `SUBREDDIT`（参数 > 环境变量 > 默认值）
+3. 获取当天日期，计算 `TEMP_DIR` 和输出文件路径
 4. **检查并清理已存在文件**：
    - 检查 `{BASE_DIR}/{YYYYMMDD}/` 目录下是否有文件
    - 如果存在，先清空该目录下所有内容
-5. `mkdir -p {TEMP_DIR}` 和 `mkdir -p {SUBREDDIT_DIR}`
+5. `mkdir -p {TEMP_DIR}`
 
-### Step 2: 逐一处理每个 Subreddit
-
-对配置的每个 Subreddit **逐一**执行 Step 2.1 ~ Step 2.4：
+### Step 2: 处理 Subreddit
 
 #### Step 2.1: 获取 Subreddit 热门 Post 列表
 
@@ -140,11 +137,11 @@ autocli reddit read {post_url} -f json
 - 评论区无有效互动（如全是 bot 回复）
 - 内容过于琐碎（如"大家好我是新人"类）
 
-对被剔除的 Post，在临时文件中记录标题和剔除原因，不写入 Subreddit 文档。
+对被剔除的 Post，在临时文件中记录标题和剔除原因，不写入最终文档。
 
-#### Step 2.4: 汇总生成 Subreddit 维度文档
+#### Step 2.4: 汇总生成输出文档
 
-读取该 Subreddit 的所有临时文件，按 rank 排序合并，写入 `{SUBREDDIT_DIR}/{subreddit_name}.md`：
+读取该 Subreddit 的所有临时文件，按 rank 排序合并，写入 `{BASE_DIR}/{YYYYMMDD}/{subreddit_name}-{YYYYMMDD}.md`：
 
 ```markdown
 ---
@@ -169,129 +166,15 @@ categories:
 
 ---
 
-## 本版小结
+## 小结
 
 （该 Subreddit 今日整体观察：社区热议话题、共同趋势、值得关注的讨论方向。3-5 句话。）
 ```
 
-### Step 3: 合并生成最终文档
-
-使用脚本/命令将所有 Subreddit 维度文档直接拼接，生成最终文档 `{BASE_DIR}/{YYYYMMDD}/reddit-daily-{YYYYMMDD}.md`。
-
-#### 拼接方式
-
-使用 `cat` 命令直接拼接（去掉各文档的 frontmatter）：
-
-```bash
-# 示例拼接命令
-cat {SUBREDDIT_DIR}/Anthropic.md {SUBREDDIT_DIR}/ChatGPT.md ... > {OUTPUT_DIR}/reddit-daily-{YYYYMMDD}.md
-```
-
-或逐篇追加：
-
-```bash
-# 先写入主文档 frontmatter
-echo "---" > {OUTPUT_DIR}/reddit-daily-{YYYYMMDD}.md
-echo "title: \"Reddit 每日精选 - {YYYY-MM-DD}\"" >> {OUTPUT_DIR}/reddit-daily-{YYYYMMDD}.md
-...
-
-# 然后逐个追加 Subreddit 内容（去掉 frontmatter）
-tail -n +12 {SUBREDDIT_DIR}/Anthropic.md >> {OUTPUT_DIR}/reddit-daily-{YYYYMMDD}.md
-tail -n +12 {SUBREDDIT_DIR}/ChatGPT.md >> {OUTPUT_DIR}/reddit-daily-{YYYYMMDD}.md
-...
-```
-
-**最终文档结构：**
-
-```markdown
----
-title: "Reddit 每日精选 - {YYYY-MM-DD}"
-date: {ISO 8601}
-description: "今日 Reddit 多个 Subreddit 热门 Post 摘要与深度解读"
-tags:
-  - Reddit
-  - Daily Digest
-categories:
-  - 技术
----
-
-# Reddit 每日精选 - {YYYY-MM-DD}
-
-> 本文精选以下 Subreddit 最近 24 小时热门 Post：{subreddit1}, {subreddit2}, ...
-
----
-
-# r/Anthropic 每日精选 - {YYYY-MM-DD}
-
-> 本文精选 r/Anthropic 最近 24 小时热门 Post...
-
-### 1. [Post 标题]
-> 链接：[url]
-> 👍 [upvotes] | 💬 [comments] | 作者：[author]
-
-#### 摘要
-3-5 句话总结 Post 内容及评论区核心讨论，准确、信息密度高。
-
-#### 核心要点
-- （3-5 个关键要点，综合 Post 原文和高质量评论）
-
-#### 可实践建议
-2-3 条可立即付诸行动的具体建议。
-
-#### 灵感启发
-思维模型、跨领域启发、值得深入探索的方向。1-2 段。
-
-#### 社交媒体分享文案
-
-**即刻：**
-口语化、有观点、适度 emoji、200 字以内，含 #Reddit热门 #{subreddit_name}
-
-**小红书：**
-标题党风格标题 + 正文，善用 emoji，300 字以内，带话题标签
-
-**Twitter/X：**
-使用简体中文, 简洁有力，280 字符以内，带 hashtag
-
-### 2. [Post 标题]
-...
-
-## 本版小结
-...
-
----
-
-# r/ChatGPT 每日精选 - {YYYY-MM-DD}
-
-> 本文精选 r/ChatGPT 最近 24 小时热门 Post...
-
-### 1. [Post 标题]
-...
-## 本版小结
-...
-
----
-
-[继续追加其他 Subreddit 的完整内容...]
-
----
-
-## 今日总结
-
-（跨 Subreddit 整体观察：共同趋势、值得关注的话题、给读者的综合建议。3-5 句话。）
-```
-
-**关键要求：**
-1. **直接拼接**：使用命令行工具（cat/tail 等）直接拼接文件内容
-2. **完整内容**：包含每个 Subreddit 的全部 Post 分析，不删减
-3. **无跳转链接**：最终文档不包含"[查看完整分析 →]"之类的链接
-4. **保留分隔**：每个 Subreddit 之间用 `---` 分隔
-5. **统一 frontmatter**：仅保留最终文档的 frontmatter，各 Subreddit 文档的 frontmatter 需去除
-
 ## 注意事项
 
-1. **逐一处理**：每个 Subreddit 逐一执行，确保资源使用合理
-2. **容错**：URL 不可访问时，先使用 autocli 动态判断获取 URL 对应内容，如果还是不行使用 agent-browser 获取内容
-3. **语言**：中文撰写
-4. **文案风格**：即刻轻松有态度、小红书吸睛有干货、Twitter 简洁专业，一律使用简体中文
-5. **筛选机制**：剔除低价值 Post，确保最终文档信息密度高
-6. **清理机制**：执行前检查并清空当日目录，避免残留数据干扰
+1. **容错**：URL 不可访问时，先使用 autocli 动态判断获取 URL 对应内容，如果还是不行使用 agent-browser 获取内容
+2. **语言**：中文撰写
+3. **文案风格**：即刻轻松有态度、小红书吸睛有干货、Twitter 简洁专业，一律使用简体中文
+4. **筛选机制**：剔除低价值 Post，确保最终文档信息密度高
+5. **清理机制**：执行前检查并清空当日目录，避免残留数据干扰
