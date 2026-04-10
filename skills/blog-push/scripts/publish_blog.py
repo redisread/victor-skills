@@ -622,32 +622,33 @@ def extract_content_without_frontmatter(content: str) -> str:
 
 
 def insert_more_marker(content: str) -> str:
-    """在第一段结束后插入 <!--more--> 截断标记（若尚未存在）"""
+    """在第一段正文结束后插入 <!--more--> 截断标记（若尚未存在）。
+    跳过开头的标题行（# 开头），在第一段正文段落之后插入。
+    """
     if "<!--more-->" in content:
         return content
 
     lines = content.split("\n")
     insert_index = None
-    found_content = False
+    in_first_paragraph = False
 
     for i, line in enumerate(lines):
         stripped = line.strip()
-        # 跳过开头的空行
-        if not found_content and stripped == "":
+        # 跳过空行和标题行（# 开头）
+        if stripped == "" or stripped.startswith("#"):
+            # 如果已经进入正文段落，空行意味着段落结束
+            if in_first_paragraph and stripped == "":
+                insert_index = i
+                break
             continue
-        # 遇到第一行非空内容
-        if stripped:
-            found_content = True
-        # 第一段结束：遇到空行（在有内容之后）
-        if found_content and stripped == "":
-            insert_index = i
-            break
+        # 遇到第一行正文内容（非标题、非空行）
+        in_first_paragraph = True
 
     if insert_index is not None:
         lines.insert(insert_index, "<!--more-->")
         lines.insert(insert_index, "")
     else:
-        # 整篇只有一段，在末尾追加
+        # 整篇只有一段正文，在末尾追加
         lines.append("")
         lines.append("<!--more-->")
 
