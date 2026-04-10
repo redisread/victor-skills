@@ -1,103 +1,95 @@
 ---
 name: blog-push
-description: Hugo 博客文章发布工具。支持三种内容类型：posts（博客文章）、daily（日报）、weekly（周报）。使用场景：(1) 用户需要发布博客文章到 Hugo，(2) "发布文章"、"publish blog"、"创建博客"、"发布日报"、"发布周报"，(3) 将完成的 Markdown 文档移动到对应目录。支持查看分类、选择目录、自动生成 front matter、处理封面图、草稿管理、环境变量配置、从任意目录执行。
+description: Hugo 博客文章智能发布工具。用于"发布博客"、"推送到blog"、"post to blog"、"发布文章"、"发布日报"、"发布周报"等场景。Claude 主导完成：自动读取博客配置、智能分析内容提取标题/分类/标签、生成 front matter、添加 <!--more--> 截断标记、复制封面图、调用脚本写入文件、git push 一键发布。支持 posts/daily/weekly 三种内容类型，从任意目录执行。
 ---
 
-# Hugo 博客文章发布技能
+# Hugo 博客文章发布
 
-将 Markdown 文档发布到 Hugo 博客，支持 **posts**、**daily**、**weekly** 三种内容类型，可从任意目录执行。
+Claude(openclaw) 主导完成整个发布流程，无需用户手动填写参数。
 
-## 快速开始
+## 发布流程
 
-**1. 配置环境变量（一次性设置）**
+### 第 1 步：读取博客配置
+
+优先从以下位置自动获取博客路径：
+1. 环境变量 `$HUGO_BLOG_DIR`
+2. 用户 MEMORY.md / USER.md 中记录的博客路径
+3. 询问用户
 
 ```bash
-# ~/.zshrc 中添加
-export HUGO_BLOG_DIR=/Users/victor/Desktop/project/github/HUGO_blog
+echo $HUGO_BLOG_DIR   # 检查环境变量
 ```
 
-详细配置参考：[references/configuration.md](references/configuration.md)
+### 第 2 步：智能分析文章内容
 
-**2. 检查配置**
+从用户提供的 Markdown 内容中自动提取：
+
+- **标题**：从 front matter `title` 字段或正文一级标题提取
+- **内容类型**：根据标题/内容判断是 posts / daily / weekly
+  - `daily`：包含日期格式标题（如"2026-04-10 AI日报"）或明显的日报内容
+  - `weekly`：包含周报/Weekly字样
+  - `posts`：默认的博客文章
+- **分类（category）**：查看博客目录下已有分类，结合内容智能选择
+- **标签（tags）**：根据内容关键词提取，最多 5 个
+- **封面图**：用户是否附带了图片路径
+
+### 第 3 步：生成发布命令
+
+根据分析结果，构造并执行脚本命令：
 
 ```bash
-python3 scripts/publish_blog.py --check-config
+# posts 类型
+python3 <skill_dir>/scripts/publish_blog.py \
+  --md <文章路径> \
+  --type posts \
+  --category <分类> \
+  --name "<标题>" \
+  --tags "<tag1>,<tag2>" \
+  --git-push \
+  [--cover <封面图路径>] \
+  [--draft]
+
+# daily 类型
+python3 <skill_dir>/scripts/publish_blog.py \
+  --md <文章路径> \
+  --type daily \
+  --git-push
+
+# weekly 类型
+python3 <skill_dir>/scripts/publish_blog.py \
+  --md <文章路径> \
+  --type weekly \
+  --git-push
 ```
 
-## 常用命令
+`--git-push` 会在写入文件后自动执行 `git add / commit / push`。
 
-### 查看分类/现有文章
+> **脚本路径**：skill 安装后路径通常为 `~/.claude/skills/blog-push/scripts/publish_blog.py`，或使用项目内相对路径。
+
+### 第 4 步：返回结果
+
+告知用户：
+- ✅ 文章写入路径
+- ✅ git commit 信息
+- ✅ push 结果（成功/失败原因）
+
+---
+
+## 直接调用模式（手动指定参数）
+
+如果用户明确提供了参数，直接拼接命令执行，无需走 AI 分析流程：
 
 ```bash
-# posts 类型 — 查看可用分类
+python3 scripts/publish_blog.py --check-config          # 检查配置
 python3 scripts/publish_blog.py --type posts --list-categories
-
-# daily/weekly 类型 — 查看现有文章
 python3 scripts/publish_blog.py --type daily --list
-python3 scripts/publish_blog.py --type weekly --list
 ```
 
-### 发布文章
+完整参数说明见：[references/configuration.md](references/configuration.md)
 
-```bash
-# posts（需指定分类）
-python3 scripts/publish_blog.py \
-  --md ./my-article.md \
-  --type posts \
-  --category 技术
-
-# daily / weekly（直接发布）
-python3 scripts/publish_blog.py --md ./ai-news.md --type daily
-python3 scripts/publish_blog.py --md ./weekly-log.md --type weekly
-```
-
-### 带封面图发布
-
-```bash
-python3 scripts/publish_blog.py \
-  --md ./my-article.md \
-  --cover ./cover.png \
-  --type posts \
-  --category AI
-```
-
-封面图会复制到文章目录，命名为 `{文章名}-cover.{扩展名}`。
-
-### 其他常用选项
-
-```bash
-# 发布为草稿
-python3 scripts/publish_blog.py --md ./draft.md --type daily --draft
-
-# 自定义文章名和标签
-python3 scripts/publish_blog.py \
-  --md ./article.md \
-  --type posts \
-  --category AI \
-  --name "我的自定义标题" \
-  --tags "AI,Python,机器学习"
-
-# 查看 Shortcodes 指南
-python3 scripts/publish_blog.py --shortcodes
-```
-
-## 智能功能
-
-脚本自动分析内容并增强 front matter：
-- 检测数学公式（`$...$`）→ 自动添加 `katex` 库
-- 检测 Mermaid 图表 → 自动添加 `mermaid` 库
-- 根据内容关键词智能建议分类和标签（可被 `--category` / `--tags` 覆盖）
-
-## 发布后步骤
-
-```bash
-cd $HUGO_BLOG_DIR
-hugo server -D        # 本地预览：http://localhost:1313
-hugo                  # 构建
-git add . && git commit -m "发布：文章标题" && git push
-```
+---
 
 ## 参考文档
 
-- **[references/configuration.md](references/configuration.md)** — 环境变量详情、Front Matter 模板、完整参数说明、注意事项
-- **[references/shortcodes.md](references/shortcodes.md)** — zzo 主题 Shortcodes 完整使用示例（boxmd、alert、expand、tabs、img、button 等）
+- **[references/configuration.md](references/configuration.md)** — 环境变量、Front Matter 模板、完整参数说明
+- **[references/shortcodes.md](references/shortcodes.md)** — zzo 主题 Shortcodes 参考（boxmd、alert、expand、tabs、notice 等）

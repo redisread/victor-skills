@@ -9,11 +9,6 @@ Hugo 博客文章发布脚本
 - HUGO_TEMPLATE_PATH: 模板文件相对路径（默认: archetypes/default.md）
 
 优先级：命令行参数 > 环境变量 > 默认值
-
-语法优化（基于 CLAUDE.md）：
-- 自动检测数学公式和 Mermaid 图表，添加 libraries 字段
-- 智能分类和标签建议
-- Shortcodes 使用提示
 """
 
 import os
@@ -22,6 +17,7 @@ import shutil
 import datetime
 import argparse
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -625,6 +621,64 @@ def extract_content_without_frontmatter(content: str) -> str:
     return "\n".join(content_lines)
 
 
+def insert_more_marker(content: str) -> str:
+    """在第一段结束后插入 <!--more--> 截断标记（若尚未存在）"""
+    if "<!--more-->" in content:
+        return content
+
+    lines = content.split("\n")
+    insert_index = None
+    found_content = False
+
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        # 跳过开头的空行
+        if not found_content and stripped == "":
+            continue
+        # 遇到第一行非空内容
+        if stripped:
+            found_content = True
+        # 第一段结束：遇到空行（在有内容之后）
+        if found_content and stripped == "":
+            insert_index = i
+            break
+
+    if insert_index is not None:
+        lines.insert(insert_index, "<!--more-->")
+        lines.insert(insert_index, "")
+    else:
+        # 整篇只有一段，在末尾追加
+        lines.append("")
+        lines.append("<!--more-->")
+
+    return "\n".join(lines)
+
+
+def git_push(blog_dir: str, article_file: str, commit_message: str) -> bool:
+    """执行 git add / commit / push"""
+    try:
+        # git add 目标文件（相对路径）
+        rel_path = os.path.relpath(article_file, blog_dir)
+        subprocess.run(["git", "add", rel_path], cwd=blog_dir, check=True)
+        subprocess.run(["git", "commit", "-m", commit_message], cwd=blog_dir, check=True)
+        result = subprocess.run(
+            ["git", "push"],
+            cwd=blog_dir,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        print(f"\n🚀 已推送到远程仓库")
+        if result.stdout:
+            print(result.stdout.strip())
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"\n❌ Git 操作失败: {e}")
+        if hasattr(e, "stderr") and e.stderr:
+            print(e.stderr.strip())
+        return False
+
+
 def display_shortcodes_guide():
     """显示 Shortcodes 使用指南"""
     print("\n" + "=" * 60)
@@ -675,6 +729,7 @@ def create_article(
     cover_path: str = None,
     draft: bool = False,
     custom_tags: list = None,
+    add_more_marker: bool = False,
 ):
     """创建博客文章"""
     if category == "ROOT":
@@ -694,6 +749,11 @@ def create_article(
     current_time = get_current_time()
     md_content = read_markdown_content(md_path)
     article_body = extract_content_without_frontmatter(md_content)
+
+    # 插入 <!--more--> 截断标记
+    if add_more_marker:
+        article_body = insert_more_marker(article_body)
+        print("  ✓ 已插入 <!--more--> 截断标记")
 
     cover_filename = ""
     if cover_path:
@@ -827,6 +887,18 @@ def main():
     )
 
     parser.add_argument(
+        "--more-marker",
+        action="store_true",
+        help="在第一段后自动插入 <!--more--> 截断标记（用于列表页摘要显示）",
+    )
+
+    parser.add_argument(
+        "--git-push",
+        action="store_true",
+        help="发布后自动执行 git add / commit / push",
+    )
+
+    parser.add_argument(
         "--blog-dir",
         help="Hugo 博客项目根目录（完整路径），优先级高于环境变量 HUGO_BLOG_DIR",
     )
@@ -910,7 +982,7 @@ def main():
     if args.tags:
         custom_tags = [tag.strip() for tag in args.tags.split(",")]
 
-    create_article(
+    article_file = create_article(
         template_path=template_path,
         md_path=args.md,
         posts_dir=target_dir,
@@ -919,7 +991,13 @@ def main():
         cover_path=args.cover,
         draft=args.draft,
         custom_tags=custom_tags,
+        add_more_marker=args.more_marker,
     )
+
+    # git push
+    if args.git_push:
+        commit_msg = f"新增: {article_name}"
+        git_push(blog_dir, article_file, commit_msg)
 
     # 显示 Shortcodes 提示
     print("\n💡 提示: 使用 --shortcodes 查看 Shortcodes 语法指南")

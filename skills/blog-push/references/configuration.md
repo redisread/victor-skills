@@ -114,6 +114,8 @@ image:
 | `--name` | `-n` | 自定义文章名称 | 使用文件名 |
 | `--draft` | `-d` | 标记为草稿 | false |
 | `--tags` | - | 自定义标签（逗号分隔） | - |
+| `--more-marker` | - | 在第一段后插入 `<!--more-->` 截断标记 | false |
+| `--git-push` | - | 发布后自动 git add/commit/push | false |
 | `--shortcodes` | - | 显示 Shortcodes 指南 | - |
 | `--check-config` | - | 显示当前配置信息 | - |
 | `--list-categories` | `-l` | 显示分类目录（posts） | - |
@@ -129,3 +131,5 @@ image:
 - 指定 `--category` 时会覆盖智能分类建议
 - `--tags` 指定的标签会与智能建议标签合并去重
 - `--posts-dir` 和 `--template` 支持相对路径（相对于 `--blog-dir`）或绝对路径
+- `--more-marker`：若文章已包含 `<!--more-->` 则跳过，不重复插入
+- `--git-push`：commit message 格式为 `新增: {文章名}`；push 失败会打印错误但不中断流程
