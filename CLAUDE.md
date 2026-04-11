@@ -39,7 +39,7 @@ npx skills add ./skills
 npx skills add ./skills --skill xxx
 ```
 
-
+注意：默认安装 ClaudeCode (project 级别) 即可
 
 ## 发布流程
 
