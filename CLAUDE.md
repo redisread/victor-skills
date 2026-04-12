@@ -4,6 +4,11 @@
 
 Victor 的 Claude Code Skill 集合，用于提升日常开发效率。使用 skill.sh 进行管理
 
+
+## 技能编写规范
+
+使用 skill-creator 创建、更新、迭代 skill
+
 ## 技能命名规范
 
 - 技能目录名称无强制前缀要求，建议使用有意义的名称
