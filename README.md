@@ -8,6 +8,12 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。使用 sk
 npx skills add ./skills
 ```
 
+## Agent 列表
+
+| Agent | 描述 |
+|------|------|
+| `para-notes-agent` | PARA 笔记管理专家，基于 Apple Notes 整理、分类、清理笔记 |
+
 ## 技能列表
 
 | 技能 | 描述 |
@@ -30,6 +36,7 @@ victor-skills/
 ├── skills/                    # 各技能实现
 │   └── <skill-name>/
 │       └── SKILL.md           # 技能定义文件
+├── .claude/agents/            # 自定义 Agent 定义
 ├── docs/                      # 项目参考文档
 ├── CLAUDE.md                  # Claude 开发指南
 └── README.md
