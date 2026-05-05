@@ -12,7 +12,6 @@ npx skills add ./skills
 
 | 技能 | 描述 |
 |------|------|
-| `apple-notes` | Apple Notes 备忘录管理，支持创建、查看、编辑、搜索、移动和导出笔记 |
 | `article-images-gen` | 文案插图专家，为文章生成手绘风格插图 |
 | `blog-push` | Hugo 博客文章智能发布工具 |
 | `hackernews-digest` | 获取 Hacker News 热门文章并生成每日摘要 |
@@ -21,6 +20,7 @@ npx skills add ./skills
 | `r2-uploader` | 上传文件到 Cloudflare R2 对象存储，返回公开访问 URL |
 | `reddit-digest` | 抓取 Subreddit 热门 Post，生成深度摘要与解读 |
 | `tool-save-to-notion` | 将工具链接保存到 Notion 工具箱 |
+| `tool-share` | 分享工具链接到社交平台 |
 | `x-following-digest` | 获取 Twitter/X Following 最近 24 小时精选推文摘要 |
 
 ## 目录结构
