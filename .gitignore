@@ -1,7 +1,2 @@
 .DS_Store
-AGENTS.md
-skills-lock.json
-.agents/
-.wrangler/
-.qwen/
 .claude/skills/

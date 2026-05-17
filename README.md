@@ -2,11 +2,6 @@
 
 Victor 的 Claude Code Skill 集合，用于提升日常开发效率。使用 skill.sh 进行管理。
 
-## 快速安装 & 更新
-
-```bash
-npx skills add ./skills
-```
 
 ## Agent 列表
 
@@ -28,25 +23,6 @@ npx skills add ./skills
 | `tool-save-to-notion` | 将工具链接保存到 Notion 工具箱 |
 | `tool-share` | 分享工具链接到社交平台 |
 | `x-following-digest` | 获取 Twitter/X Following 最近 24 小时精选推文摘要 |
-
-## 目录结构
-
-```
-victor-skills/
-├── skills/                    # 各技能实现
-│   └── <skill-name>/
-│       └── SKILL.md           # 技能定义文件
-├── .claude/agents/            # 自定义 Agent 定义
-├── docs/                      # 项目参考文档
-├── CLAUDE.md                  # Claude 开发指南
-└── README.md
-```
-
-## 开发新技能
-
-1. 在 `skills/` 下创建新目录，命名无强制前缀要求
-2. 创建 `SKILL.md` 定义技能行为（frontmatter 需包含 `name`、`description`）
-3. 更新本 `README.md` 的技能列表
 
 ## 许可证
 
