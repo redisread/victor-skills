@@ -17,6 +17,8 @@ metadata:
     ↓
 识别类型(单曲 / 专辑 / 歌手)
     ↓
+smart-search 搜集音乐信息(调用 smart-search skill,实时搜索歌曲详情/歌词/评价)
+    ↓
 深度研究(根据类型选择研究方向)
     ↓
 生成音乐研究笔记(高质量 Markdown 格式)
@@ -46,21 +48,42 @@ metadata:
 - 如果是专辑链接(Apple Music 不含 `?i=` 参数),判定为专辑
 - 默认情况下,输入歌曲名 → 单曲
 
-## Step 1: 识别内容
+## Step 1: 使用 smart-search 搜集音乐信息
 
-根据输入类型搜索确认信息:
+**在开始深度研究之前,必须先调用 `smart-search` skill 进行信息搜集。** 这一步的目标是获取实时、准确的音乐相关数据,为后续研究提供素材。
 
-### 单曲识别
+### 1.1 调用 smart-search
 
-```bash
-# 搜索歌曲
-web_search "<歌曲名/关键词> 歌手 专辑"
+使用 `/smart-search` skill,根据输入类型构造查询:
 
-# 如果是链接,从 URL 提取信息
-web_fetch --url "<URL>" --maxChars 10000
+**单曲查询示例**:
+```
+使用 smart-search,搜索: "<歌曲名> <艺人名> 歌词 专辑 作词 作曲 发行日期"
+优先 AI 源(中文内容选 doubao,英文内容选 grok/gemini),再补充 Genius/Discogs 等专用源
 ```
 
-必须确认:
+**专辑查询示例**:
+```
+使用 smart-search,搜索: "<专辑名> <艺人名> 曲目列表 制作人 唱片公司 发行日期 评价"
+```
+
+**歌手查询示例**:
+```
+使用 smart-search,搜索: "<歌手名> 出道年份 代表作品 音乐风格 奖项 生平"
+```
+
+### 1.2 搜索策略
+
+1. **先跑预检**: `opencli list -f yaml` 确认可用源
+2. **选 AI 源**: 中文音乐内容优先 `doubao`,英文优先 `grok` 或 `gemini`
+3. **补专用源**: AI 结果不足时,补充 1-2 个专用源(如豆瓣音乐、Genius)
+4. **记录搜索摘要**: 查询结束后汇报使用了什么网站、搜了什么词、搜了几次
+
+### 1.3 从搜索结果提取关键信息
+
+根据类型,从 smart-search 结果中提取以下信息:
+
+#### 单曲必须确认
 - 歌曲名(准确名称)
 - 原唱/主要艺人
 - 作词人(如有公开信息)
@@ -70,29 +93,7 @@ web_fetch --url "<URL>" --maxChars 10000
 - 流派/曲风(最多 3 个)
 - 语言(中文/英文/日文/韩文/其他)
 
-### 经典歌词提取
-
-研究阶段搜索歌词来源:
-```bash
-# 搜索歌词
-web_search "<歌曲名> <艺人> 歌词 genius"
-web_search "<歌曲名> <艺人> lyrics"
-
-# 从 Genius 提取
-web_fetch --url "https://genius.com/<artist>-<song>-lyrics" --maxChars 10000
-```
-
-提取 **2-4 句最经典/最有代表性的歌词**,选择标准:
-- 最抓耳/最有记忆点的 hook 句
-- 最能体现歌曲主题或情感的核心句
-- 文学性最强、意境最美的句子
-- 流传最广、最常被引用的句子
-
-⚠️ 不要复制整段歌词,只选最精华的几句。
-
-### 专辑识别
-
-必须确认:
+#### 专辑必须确认
 - 专辑名(准确名称)
 - 主要艺人/歌手
 - 发行日期
@@ -101,9 +102,7 @@ web_fetch --url "https://genius.com/<artist>-<song>-lyrics" --maxChars 10000
 - 曲目数量
 - 制作人(如有公开信息)
 
-### 歌手识别
-
-必须确认:
+#### 歌手必须确认
 - 歌手名/艺名
 - 出生地/国籍
 - 出道年份
@@ -111,7 +110,15 @@ web_fetch --url "https://genius.com/<artist>-<song>-lyrics" --maxChars 10000
 - 主要流派
 - 重要奖项
 
-## Step 2: 深度研究
+### 1.4 如果 smart-search 结果不足
+
+- 明确告知用户哪些信息无法确认
+- 不要编造数据
+- 继续用内置 WebSearch 作为补充(但优先 smart-search)
+
+## Step 2: 经典歌词提取
+
+## Step 3: 深度研究
 
 ### 单曲研究维度
 
@@ -183,7 +190,7 @@ web_fetch --url "https://genius.com/<artist>-<song>-lyrics" --maxChars 10000
 3. **媒体**:Pitchfork、Rolling Stone、NME、The Fader
 4. **社区**:Reddit、YouTube 评论、豆瓣音乐、音乐论坛
 
-## Step 3: 生成研究笔记
+## Step 4: 生成研究笔记
 
 输出像**乐评人/音乐制作人/Digging DJ/文化评论者**写的研究笔记,而不是 AI 百科摘要。
 
@@ -296,7 +303,7 @@ web_fetch --url "https://genius.com/<artist>-<song>-lyrics" --maxChars 10000
 (外部链接:Apple Music、网易云、官网等)
 ```
 
-## Step 4: 写入 Notion
+## Step 5: 写入 Notion
 
 ### 4.1 搜索并下载封面
 
