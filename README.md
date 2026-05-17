@@ -18,7 +18,7 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。使用 sk
 | `bloomscroll-style-writer` | 生成 Bloomscroll 风格的个人随笔文章 |
 | `hackernews-digest` | 获取 Hacker News 热门文章并生成每日摘要 |
 | `jike-digest` | 抓取即刻 Topic 热门内容，生成每日精选摘要 |
-| `music-research` | 深度音乐研究，生成音乐笔记并写入 Notion |
+| `music-notes` | 深度音乐研究，生成音乐笔记并写入 Notion |
 | `r2-uploader` | 上传文件到 Cloudflare R2 对象存储，返回公开访问 URL |
 | `reddit-daily-digest` | 抓取 subreddit 每日热门，按 Notion 文献库格式生成摘要 |
 | `reddit-digest` | 抓取 Subreddit 热门 Post，生成深度摘要与解读 |

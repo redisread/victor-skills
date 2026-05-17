@@ -1,5 +1,5 @@
 ---
-name: music-research
+name: music-notes
 description: 深度音乐研究 Agent。接收歌曲名、艺人、Apple Music/Spotify/YouTube 链接、歌词片段或听感,自动识别歌曲/专辑/歌手并进行深度研究,生成高质量音乐研究笔记,写入 Notion 音乐数据库(使用类型字段区分)。触发词:音乐研究、研究这首歌、music research、分析这首歌、记录音乐、专辑研究、歌手研究。
 version: 1.0.0
 metadata:
