@@ -55,16 +55,25 @@ metadata:
 
 ## 安装/更新 技能
 
-默认安装和更新到当前项目，除非指定其他目录。
+### 本地开发（当前项目）
 
-优先更新单个技能(非交互式):
+优先更新单个技能（非交互式）：
 ```bash
 npx skills add ./skills/<skill-name> -y --agent claude-code --target .
 ```
 
-更新全部技能(非交互式):
+更新全部技能（非交互式）：
 ```bash
 npx skills add ./skills -y --agent claude-code --target .
 ```
+
+### 系统全局安装（稳定版）
+
+从远程仓库安装到全局 Claude Code（`-g`）：
+```bash
+npx skills add redisread/victor-skills --skill <skill-name> --agent claude-code -y -g
+```
+
+> 推送到仓库的是稳定版，全局安装使用此方式。本地开发时用上面的本地安装方式。
 
 
