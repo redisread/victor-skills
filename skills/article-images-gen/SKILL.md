@@ -3,7 +3,7 @@ name: article-images-gen
 description: 文案插图专家，为文章生成手绘风格插图。风格：手绘、简约、整洁、留白、构图平衡、色调统一。Use when user asks to generate illustrations for articles, "为文章配图", "生成插图", or needs hand-drawn style images for content.
 version: 2.0.0
 metadata:
-  homepage: https://github.com/victor-skills/tree/main/skills/article-images-gen
+  homepage: https://github.com/victor-skills#article-images-gen
 ---
 
 # Article Images Generator (文案插图专家)
