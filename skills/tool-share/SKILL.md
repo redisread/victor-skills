@@ -1,6 +1,9 @@
 ---
 name: tool-share
 description: "根据给定的工具信息，调研工具的官网链接、基本使用和最佳实践，生成一篇结构化的工具分享文章。当用户想要分享、介绍某个开发工具、框架、库或软件时使用此技能。触发词：工具分享、tool share、工具介绍、推荐工具、分享工具。"
+version: 1.0.0
+metadata:
+  homepage: https://github.com/victor-skills#tool-share
 ---
 
 # Tool Share

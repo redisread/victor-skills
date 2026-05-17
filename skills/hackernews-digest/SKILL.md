@@ -3,6 +3,9 @@ name: hackernews-digest
 description: |
   获取 Hacker News 热门文章并生成每日摘要。对每篇文章进行总结、提炼核心要点、给出可实践建议、灵感启发，以及生成社交媒体分享文案（即刻 + 小红书 + Twitter/X）。
   触发场景：用户提到 "HN 摘要"、"Hacker News 日报"、"hackernews digest"、"今日 HN"、"HN 热门"、"技术日报" 等。即使用户只说 "看看今天 HN 有什么"，也应触发此技能。
+version: 1.0.0
+metadata:
+  homepage: https://github.com/victor-skills#hackernews-digest
 ---
 
 # Hacker News 每日摘要技能

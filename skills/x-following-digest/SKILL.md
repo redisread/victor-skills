@@ -2,6 +2,8 @@
 name: x-following-digest
 version: 2.0.0
 description: "获取 Twitter/X Following 最近 24 小时精选推文（含 RT 转发），自动获取原帖完整内容，生成摘要分析和社交媒体文案。当用户提到 '获取 following 推文'、'following 推文摘要'、'推特关注列表 digest' 或类似请求时触发使用。"
+metadata:
+  homepage: https://github.com/victor-skills#x-following-digest
 ---
 
 # X Following Digest

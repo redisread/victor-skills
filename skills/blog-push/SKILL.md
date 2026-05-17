@@ -1,6 +1,9 @@
 ---
 name: blog-push
 description: Hugo 博客文章智能发布工具。用于"发布博客"、"推送到blog"、"post to blog"、"发布文章"、"发布日报"、"发布周报"等场景。Claude 主导完成：自动读取博客配置、智能分析内容提取标题/分类/标签、生成 front matter、添加 <!--more--> 截断标记、复制封面图、调用脚本写入文件、git push 一键发布。支持 posts/daily/weekly 三种内容类型，从任意目录执行。
+version: 1.0.0
+metadata:
+  homepage: https://github.com/victor-skills#blog-push
 ---
 
 # Hugo 博客文章发布
