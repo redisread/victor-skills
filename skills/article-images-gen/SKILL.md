@@ -41,8 +41,6 @@ bun scripts/main.ts --promptfiles prompt1.md,prompt2.md
 - **超时**：单次生成最长 300 秒
 
 ## 环境要求
-
-- **运行时**：[bun](https://bun.sh) (`bun run` / `bunx`)
 - **依赖**：`opencli` 已安装且 `gemini` / `grok` 可用
 - **浏览器**：opencli 需要 Chrome 浏览器支持（自动化操作 gemini.google.com / grok.com）
 
