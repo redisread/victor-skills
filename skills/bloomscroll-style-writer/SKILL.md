@@ -1,6 +1,6 @@
 ---
 name: bloomscroll-style-writer
-description: Generate personal reflection articles in the Bloomscroll newsletter style (mymind). Warm, self-deprecating, first-person voice with curated content sections. Each section has a 💭 title, personal reflection, and gentle humor. Trigger words: Bloomscroll风格, 个人随笔, 知识随笔, weekly digest, 写随笔.
+description: "Generate personal reflection articles in the Bloomscroll newsletter style (mymind). Warm, self-deprecating, first-person voice with curated content sections. Each section has a personal title, reflection, and gentle humor. Trigger words: Bloomscroll风格, 个人随笔, 知识随笔, weekly digest, 写随笔."
 version: 1.0.0
 metadata:
   homepage: https://github.com/victor-skills#bloomscroll-style-writer

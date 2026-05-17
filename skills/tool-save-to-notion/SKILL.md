@@ -1,7 +1,6 @@
 ---
 name: tool-save-to-notion
-description: Save tool links to Notion Toolbox. Use this skill whenever user provides ANY tool URL (GitHub, official website, product page, AI tool, browser extension, software, online service) and wants to save it to Notion. This skill automatically extracts tool info (name, type, tags, description) from the page and saves it as a structured database entry. Common triggers: "保存这个工具", "添加到工具箱", "收藏这个链接", "save this tool", "add to toolbox".
-compatibility: Requires Bash tool for API calls, WebFetch for extracting page info, NOTION_API_KEY environment variable configured
+description: "Save tool links to Notion Toolbox. Use this skill whenever user provides ANY tool URL (GitHub, official website, product page, AI tool, browser extension, software, online service) and wants to save it to Notion. This skill automatically extracts tool info (name, type, tags, description) from the page and saves it as a structured database entry. Common triggers: 保存这个工具, 添加到工具箱, 收藏这个链接, save this tool, add to toolbox."
 version: 1.0.0
 metadata:
   homepage: https://github.com/victor-skills#tool-save-to-notion
