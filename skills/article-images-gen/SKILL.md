@@ -25,6 +25,9 @@ bun scripts/main.ts --promptfiles prompt1.md,prompt2.md
 
 密度选项：`minimal` (1-2张) | `balanced` (3-4张) | `per-section`（推荐）| `rich` (5+张)
 
+(短文选择 per-section 密度，长文选择 rich 密度)
+
+
 ## 工作流程
 
 1. **分析文案**：识别章节结构、核心论点、适合插图的位置
