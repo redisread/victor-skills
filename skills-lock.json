@@ -2,9 +2,9 @@
   "version": 1,
   "skills": {
     "article-images-gen": {
-      "source": "/Users/victor/Desktop/project/github/victor-skills/skills",
+      "source": "/Users/victor/Desktop/project/github/victor-skills/skills/article-images-gen",
       "sourceType": "local",
-      "computedHash": "e5c77ad2a711dcef9f57e7eb35a20b91dee26120db1b6f0fc5c606d265485843"
+      "computedHash": "b9985b068bd37acd20b53acfb1c6560677e4cc08109ec3c1aa94b790ea966546"
     },
     "blog-push": {
       "source": "/Users/victor/Desktop/project/github/victor-skills/skills",

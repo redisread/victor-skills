@@ -124,8 +124,9 @@ async function generateIllustrationsForArticle(
     const outputPath = path.join(outputDir, position.filename);
 
     try {
-      const imageBuffer = await generateImage(promptText);
-      await writeFile(outputPath, imageBuffer);
+      const result = await generateImage(promptText, { outputDir });
+      // Copy the generated image to the expected output path
+      await copyFile(result.imagePath, outputPath);
       console.log(`  ✓ Illustration ${position.index}: ${position.filename}`);
       successCount++;
     } catch (error) {

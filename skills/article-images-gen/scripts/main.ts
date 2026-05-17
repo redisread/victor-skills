@@ -4,13 +4,15 @@
  */
 
 import process from "node:process";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import path from "node:path";
 import { generateImage } from "./image-generator";
 
 type CliArgs = {
   prompt: string | null;
   promptFiles: string | null;
   image: string | null;
+  outputDir: string | null;
   help: boolean;
 };
 
@@ -24,6 +26,7 @@ Options:
   --prompt <text>        Direct prompt for image generation
   --promptfiles <files>  Comma-separated list of prompt files to read
   --image <path>         Output image path (used with --promptfiles)
+  --output-dir <path>    Output directory for generated images
   -h, --help             Show help
 `);
 }
@@ -33,6 +36,7 @@ function parseArgs(argv: string[]): CliArgs {
     prompt: null,
     promptFiles: null,
     image: null,
+    outputDir: null,
     help: false,
   };
 
@@ -44,6 +48,8 @@ function parseArgs(argv: string[]): CliArgs {
       args.promptFiles = argv[++i] ?? null;
     } else if (current === "--image") {
       args.image = argv[++i] ?? null;
+    } else if (current === "--output-dir") {
+      args.outputDir = argv[++i] ?? null;
     } else if (current === "--help" || current === "-h") {
       args.help = true;
     }
@@ -60,15 +66,21 @@ async function main(): Promise<void> {
     return;
   }
 
+  const outDir = args.outputDir || "/tmp/imageGen/opencli";
+  await mkdir(outDir, { recursive: true });
+
   if (args.prompt) {
     // Direct prompt mode
-    console.log("Generating image with DashScope (qwen-image-2.0-pro)... Size: 1280*720");
+    console.log("Generating image (Gemini → Grok fallback)...");
 
-    const imageBuffer = await generateImage(args.prompt);
+    const result = await generateImage(args.prompt, { outputDir: outDir });
 
-    const outputPath = args.image || `output-${Date.now()}.png`;
-    await writeFile(outputPath, imageBuffer);
-    console.log(`Image saved to: ${outputPath}`);
+    if (args.image && result.imagePath !== args.image) {
+      await writeFile(args.image, await readFile(result.imagePath));
+      console.log(`Image copied to: ${args.image}`);
+    } else {
+      console.log(`Image saved to: ${result.imagePath}`);
+    }
     return;
   }
 
@@ -79,13 +91,15 @@ async function main(): Promise<void> {
       const promptContent = await readFile(file.trim(), "utf8");
       const promptText = promptContent.replace(/^---\n[\s\S]*?\n---\n/, "").trim();
 
-      console.log(`Generating image with DashScope (qwen-image-2.0-pro)... Size: 1280*720`);
+      console.log(`Generating image (Gemini → Grok fallback)...`);
 
-      const imageBuffer = await generateImage(promptText);
+      const result = await generateImage(promptText, { outputDir: outDir });
 
       const outputFile = args.image || file.trim().replace(".md", ".png");
-      await writeFile(outputFile, imageBuffer);
-      console.log(`Image saved to: ${outputFile}`);
+      if (result.imagePath !== outputFile) {
+        await writeFile(outputFile, await readFile(result.imagePath));
+      }
+      console.log(`Image saved to: ${result.imagePath}`);
     }
     return;
   }
