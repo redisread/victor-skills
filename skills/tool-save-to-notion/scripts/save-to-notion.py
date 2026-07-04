@@ -24,7 +24,7 @@ NOTION_API_URL = 'https://api.notion.com/v1/pages'
 
 # Valid types (exactly 5 options)
 VALID_TYPES = {'软件', '网站', '浏览器插件', 'Prompt', '工具包'}
-NOTION_VERSION = '2021-05-13'  # Supports children parameter at creation time
+NOTION_VERSION = '2022-06-28'
 
 # Icon mapping based on tool type and features
 ICON_MAP = {

@@ -25,8 +25,14 @@ metadata:
 
 ## Step 1: 定位文件
 
+按优先级搜索常见目录（避免无边界搜索整个 home）：
+
 ```bash
-find ~ -name "<filename>" -type f 2>/dev/null | head -5
+# 优先搜索常见目录
+find ~/Downloads ~/Desktop ~/Documents /tmp -maxdepth 3 -name "<filename>" -type f 2>/dev/null | head -5
+
+# 未找到时扩大范围（仍限深度）
+find ~ -maxdepth 5 -name "<filename>" -type f 2>/dev/null | head -5
 ```
 
 ## Step 2: 生成路径

@@ -18,7 +18,7 @@ metadata:
 |------|--------|------|
 | `--base-dir` 参数 | 最高 | `--base-dir /tmp/hn` |
 | `HN_DIGEST_BASE_DIR` 环境变量 | 中 | `export HN_DIGEST_BASE_DIR=...` |
-| 默认值 | 最低 | 由运行脚本管理 |
+| 默认值 | 最低 | `~/Desktop/resource/daily-info/hacknews` |
 
 路径规则：
 - 临时目录：`{BASE_DIR}/{YYYYMMDD}/temp/`

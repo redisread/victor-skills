@@ -70,6 +70,11 @@ metadata:
 
 ```bash
 NOTION_KEY=$(cat ~/.config/notion/api_key)
+
+# 页面/数据库操作
+PAGE_API_VERSION="2022-06-28"
+
+# Files API（图片上传）
 FILES_API_URL="https://api.notion.com/v1/file_uploads"
 FILES_API_VERSION="2025-09-03"
 ```

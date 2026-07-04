@@ -5,7 +5,7 @@
 | 名称 | 值 |
 |------|-----|
 | 工具箱 Database ID | `6f7bb9cc-ac01-41c5-9856-fb1568d197ae` |
-| API 版本 | `2021-05-13`（支持 children 参数） |
+| API 版本 | `2022-06-28` |
 
 ## 数据库字段
 
@@ -25,7 +25,7 @@
 ```bash
 curl -X POST "https://api.notion.com/v1/pages" \
   -H "Authorization: Bearer $NOTION_API_KEY" \
-  -H "Notion-Version: 2021-05-13" \
+  -H "Notion-Version: 2022-06-28" \
   -H "Content-Type: application/json" \
   -d '{
     "parent": {"database_id": "6f7bb9cc-ac01-41c5-9856-fb1568d197ae"},
