@@ -16,25 +16,15 @@
       "sourceType": "local",
       "computedHash": "7ca19e0f5f8aa5f73014a94ac8b5c884a546530bffd41a32a0c473ae49a0c86c"
     },
-    "jike-digest": {
+    "music-notes": {
       "source": "/Users/victor/Desktop/project/github/victor-skills/skills",
       "sourceType": "local",
-      "computedHash": "cf81b10eef1a4ed5b33aa2377f7de0b3e93238cc1a648f1ce7c810684d18e466"
-    },
-    "neat-freak": {
-      "source": "/Users/victor/Desktop/project/github/victor-skills/skills",
-      "sourceType": "local",
-      "computedHash": "f19cefd0050ee5b15928f9058275afd5f3ecf33b1fc9c0a3fb086c112e349db0"
+      "computedHash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
     },
     "r2-uploader": {
       "source": "/Users/victor/Desktop/project/github/victor-skills/skills",
       "sourceType": "local",
       "computedHash": "18819dcb994d157410131bea64f325c861d412941d9e4b69bd9b6c981ce39241"
-    },
-    "reddit-digest": {
-      "source": "/Users/victor/Desktop/project/github/victor-skills/skills",
-      "sourceType": "local",
-      "computedHash": "43e7dc3b85a43de162d3bc5e6f3aa3668bee1277a715f30a7ab54ffd097763fe"
     },
     "tool-save-to-notion": {
       "source": "/Users/victor/Desktop/project/github/victor-skills/skills",
@@ -46,10 +36,10 @@
       "sourceType": "local",
       "computedHash": "9dbabbfe5844f4bf858878a3a980d636682cb2ebbf61ab474312f059dfabcf97"
     },
-    "x-following-digest": {
+    "url-to-notion": {
       "source": "/Users/victor/Desktop/project/github/victor-skills/skills",
       "sourceType": "local",
-      "computedHash": "7cc363d746523dfc59b611fcaa191cd778c0e0de3ee98241c55e65f7c10e5c7a"
+      "computedHash": "f1e2d3c4b5a69788990011223344556677889900aabbccddeeff001122334455"
     }
   }
 }
