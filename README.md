@@ -7,6 +7,7 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 | Agent | 描述 |
 |------|------|
 | `para-notes-agent` | PARA 笔记管理专家，基于 Apple Notes 整理、分类、清理笔记 |
+| `quality-info-reviewer` | 高质量信息审查员，按 10 条标准评估 URL 或文本，判定是否值得读 |
 
 ## 技能列表
 
