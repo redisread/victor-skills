@@ -1,7 +1,9 @@
----
 name: notion-zettelkasten
-description: "Notion 卡片盒笔记系统（Zettelkasten）管理工具。支持查询和创建文献笔记、灵感笔记、永久笔记（含正文），查询/创建/删除工具箱，URL保存工具到工具箱，查询领域，URL保存文章到文献笔记。触发词：文献笔记、灵感笔记、永久笔记、卡片笔记、工具箱、领域查询、记笔记、记灵感、收集文献、保存文章、保存工具、url-to-notion、zettelkasten。当用户提到 Notion 笔记的查询、创建、删除或 URL 保存时使用。"
+description: "Notion 卡片盒笔记系统（Zettelkasten）管理工具。支持查询和创建文献笔记、灵感笔记、永久笔记（含正文），查询/创建/删除工具箱，URL保存工具到工具箱，查询领域，URL保存文章到文献笔记。触发词：文献笔记、灵感笔记、永久笔记、卡片笔记、工具箱、领域查询、记笔记、记灵感、收集文献、保存文章、保存工具、url-to-notion、zettelkasten、保存文章到 Notion、裁剪文章、保存到整理笔记、保存这个工具、添加到工具箱、收藏这个链接、save this tool、add to toolbox。当用户提到 Notion 笔记的查询、创建、删除或 URL 保存时使用。"
 version: 1.0.0
+metadata:
+  homepage: https://github.com/victor-skills#notion-zettelkasten
+
 ---
 
 # Notion Zettelkasten 技能
@@ -939,4 +941,3 @@ curl -s -X POST "https://api.notion.com/v1/pages" \
 13. **正文超长处理**：单个 rich_text content 上限 2000 字符，超长内容需拆分为多个 paragraph block
 14. **英文翻译**：功能 12 保存文献笔记时，如果原文是英文，必须逐段翻译为简体中文后写入正文。翻译要求：忠实原文完整内容，不做摘要不删减，保留段落结构，技术术语可保留英文并括号标注中文
 15. **封面设置**：功能 12 保存文献笔记时，第一张图片设为页面 cover 属性，不重复插入正文
-
