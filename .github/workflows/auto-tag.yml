@@ -1,0 +1,100 @@
+name: Auto Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'skills/*/SKILL.md'
+      - '.claude/agents/*.md'
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # 需要前一次 commit 对比
+
+      - name: 检测版本变更
+        id: detect
+        run: |
+          # 找出所有修改的 SKILL.md 和 agent .md
+          changed_files=$(git diff --name-only HEAD^ HEAD | grep -E '(skills/.*/SKILL.md|.claude/agents/.*\.md)$' || true)
+
+          if [[ -z "$changed_files" ]]; then
+            echo "ℹ️  无技能/Agent 文件变更"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          touch versions.txt
+
+          for f in $changed_files; do
+            # 提取 name 和 version
+            name=$(grep '^name:' "$f" | head -1 | sed 's/name: *//')
+            version=$(grep '^version:' "$f" | head -1 | sed 's/version: *//')
+
+            if [[ -z "$name" || -z "$version" ]]; then
+              echo "⚠️  $f: 缺少 name 或 version 字段，跳过"
+              continue
+            fi
+
+            # 检查旧版本是否存在且不同
+            old_version=$(git show HEAD^:"$f" 2>/dev/null | grep '^version:' | head -1 | sed 's/version: *//' || echo "")
+
+            if [[ "$old_version" != "$version" && -n "$version" ]]; then
+              tag="$name@$version"
+              echo "$tag" >> versions.txt
+              echo "📦 检测到版本变更: $name $old_version → $version"
+            fi
+          done
+
+          if [[ -s versions.txt ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "将创建以下 tags:"
+            cat versions.txt
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  无版本变更"
+          fi
+
+      - name: 创建并推送 Tags
+        if: steps.detect.outputs.has_changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          while IFS= read -r tag; do
+            # 检查 tag 是否已存在
+            if git rev-parse "$tag" >/dev/null 2>&1; then
+              echo "⚠️  Tag $tag 已存在，跳过"
+              continue
+            fi
+
+            git tag -a "$tag" -m "Release $tag"
+            git push origin "$tag"
+            echo "✅ Created and pushed tag: $tag"
+          done < versions.txt
+
+      - name: 生成发布摘要
+        if: steps.detect.outputs.has_changes == 'true'
+        run: |
+          echo "## 🎉 新版本发布" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "以下技能/Agent 已发布新版本：" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          while IFS= read -r tag; do
+            name=${tag%@*}
+            version=${tag#*@}
+            echo "- **$name** → $version" >> $GITHUB_STEP_SUMMARY
+          done < versions.txt
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "安装最新版本的技能：" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "npx skills add redisread/victor-skills --skill <skill-name> -y -g" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

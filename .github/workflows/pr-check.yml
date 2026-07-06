@@ -1,0 +1,150 @@
+name: PR Check
+
+on:
+  pull_request:
+    paths:
+      - 'skills/*/SKILL.md'
+      - '.claude/agents/*.md'
+      - 'README.md'
+      - 'CHANGELOG.md'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 验证 SKILL.md / Agent frontmatter
+        run: |
+          errors=0
+
+          # 找出所有修改的 SKILL.md 和 agent .md
+          changed_files=$(git diff --name-only origin/main...HEAD | grep -E '(skills/.*/SKILL.md|.claude/agents/.*\.md)$' || true)
+
+          if [[ -z "$changed_files" ]]; then
+            echo "ℹ️  无技能/Agent 文件变更，跳过验证"
+            exit 0
+          fi
+
+          for f in $changed_files; do
+            echo "检查: $f"
+
+            # 检查 name 字段
+            if ! grep -q '^name:' "$f"; then
+              echo "❌ $f: 缺少 name 字段"
+              errors=$((errors+1))
+            fi
+
+            # 检查 version 字段
+            if ! grep -q '^version:' "$f"; then
+              echo "❌ $f: 缺少 version 字段"
+              errors=$((errors+1))
+            else
+              # 验证版本号格式（SemVer）
+              ver=$(grep '^version:' "$f" | head -1 | sed 's/version: *//')
+              if ! echo "$ver" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+                echo "❌ $f: 版本号格式错误 '$ver'（需为 MAJOR.MINOR.PATCH）"
+                errors=$((errors+1))
+              fi
+            fi
+
+            # 检查 description 字段
+            if ! grep -q '^description:' "$f"; then
+              echo "❌ $f: 缺少 description 字段"
+              errors=$((errors+1))
+            fi
+          done
+
+          if [[ $errors -gt 0 ]]; then
+            echo ""
+            echo "❌ 发现 $errors 个错误，请修复后重新提交"
+            exit 1
+          fi
+
+          echo "✅ 所有文件验证通过"
+
+      - name: 检查 README 版本一致性
+        run: |
+          errors=0
+
+          # 检查所有技能的版本是否在 README 中正确记录
+          for skill_dir in skills/*/; do
+            skill_file="$skill_dir/SKILL.md"
+            if [[ -f "$skill_file" ]]; then
+              name=$(grep '^name:' "$skill_file" | sed 's/name: *//')
+              version=$(grep '^version:' "$skill_file" | sed 's/version: *//')
+
+              # 检查 README 中是否有该技能的条目
+              if ! grep -q "| \`$name\` |" README.md; then
+                echo "⚠️  $name: README.md 中未找到对应条目"
+                errors=$((errors+1))
+              else
+                # 检查版本号是否一致
+                readme_version=$(grep "| \`$name\` |" README.md | sed 's/.*| `'"$name"'` | \([0-9.]*\) |.*/\1/')
+                if [[ "$readme_version" != "$version" ]]; then
+                  echo "❌ $name: README 版本 ($readme_version) 与 SKILL.md ($version) 不一致"
+                  errors=$((errors+1))
+                fi
+              fi
+            fi
+          done
+
+          # 检查 Agent
+          for agent_file in .claude/agents/*.md; do
+            if [[ -f "$agent_file" ]]; then
+              name=$(grep '^name:' "$agent_file" | sed 's/name: *//')
+              version=$(grep '^version:' "$agent_file" | sed 's/version: *//')
+
+              if [[ -n "$name" && -n "$version" ]]; then
+                if ! grep -q "| \`$name\` |" README.md; then
+                  echo "⚠️  Agent $name: README.md 中未找到对应条目"
+                  errors=$((errors+1))
+                else
+                  readme_version=$(grep "| \`$name\` |" README.md | sed 's/.*| `'"$name"'` | \([0-9.]*\) |.*/\1/')
+                  if [[ "$readme_version" != "$version" ]]; then
+                    echo "❌ Agent $name: README 版本 ($readme_version) 与 agent 定义 ($version) 不一致"
+                    errors=$((errors+1))
+                  fi
+                fi
+              fi
+            fi
+          done
+
+          if [[ $errors -gt 0 ]]; then
+            echo ""
+            echo "❌ README 版本检查失败，请同步更新版本号"
+            exit 1
+          fi
+
+          echo "✅ README 版本一致性检查通过"
+
+      - name: 检查 CHANGELOG 更新
+        run: |
+          # 如果有版本变更，检查 CHANGELOG 是否更新
+          changed_files=$(git diff --name-only origin/main...HEAD || true)
+
+          has_version_change=false
+          for f in $changed_files; do
+            if [[ "$f" =~ skills/.*/SKILL.md$ ]] || [[ "$f" =~ .claude/agents/.*.md$ ]]; then
+              # 检查版本是否变化
+              old_ver=$(git show origin/main:"$f" 2>/dev/null | grep '^version:' | sed 's/version: *//' || echo "")
+              new_ver=$(grep '^version:' "$f" | sed 's/version: *//')
+
+              if [[ "$old_ver" != "$new_ver" && -n "$new_ver" ]]; then
+                has_version_change=true
+                break
+              fi
+            fi
+          done
+
+          if $has_version_change; then
+            if ! git diff --name-only origin/main...HEAD | grep -q 'CHANGELOG.md'; then
+              echo "⚠️  检测到版本变更，但未更新 CHANGELOG.md"
+              echo "建议在 CHANGELOG.md 中记录本次版本变更"
+              # 不阻止合并，只是警告
+            else
+              echo "✅ CHANGELOG.md 已更新"
+            fi
+          fi
