@@ -5,7 +5,7 @@
 优先使用 `opencli web`（支持 JS 渲染）：
 
 ```bash
-~/.npm-global/bin/opencli web article "<URL>" -f json > /tmp/article_<id>.json
+opencli web article "<URL>" -f json > /tmp/article_<id>.json
 ```
 
 回退方案：`agent-browser`：
@@ -23,14 +23,14 @@ agent-browser get text body --json
 
 ### 1. 抓取文本
 ```bash
-~/.npm-global/bin/opencli twitter article "<X URL>" -f json > /tmp/x_<id>.json
+opencli twitter article "<X URL>" -f json > /tmp/x_<id>.json
 ```
 - 普通推文在 `content` 字段（Markdown）
 - X Article 含标题 + 完整正文
 
 ### 2. 下载图片/附件
 ```bash
-~/.npm-global/bin/opencli twitter download --tweet-url "<X URL>" -f json --output /tmp/x_dl_<id>
+opencli twitter download --tweet-url "<X URL>" -f json --output /tmp/x_dl_<id>
 ```
 - 文件保存在 `/tmp/x_dl_<id>/tweets/` 目录
 - 命名：`tweet_1.jpg`, `tweet_2.png`...
