@@ -613,7 +613,7 @@ import re
 def detect_language(text):
     """检测文本主要语言"""
     # 简单检测：统计中文字符占比
-    chinese_chars = len(re.findall(r'[一-鿿]', text))
+    chinese_chars = len(re.findall(r'[\u4e00-\u9fff]', text))
     total_chars = len(text.strip())
     if total_chars == 0:
         return "unknown"
@@ -917,7 +917,7 @@ curl -s -X POST "https://api.notion.com/v1/pages" \
 **已知限制：**
 - `opencli twitter article` 不支持提取 X Article 内嵌图片（Draft.js entityMap 中的图片被丢弃）
 - `opencli twitter download --tweet-url` 对 Article 类型返回 EMPTY_RESULT
-- X 图片 URL（pbs.twimg.com）本地环境不可达，需用 `external` 类型或 fxtwitter API 辅助
+- X 图片 URL（pbs.twimg.com）本地环境可能不可达，需用 `external` 类型或 fxtwitter API 辅助
 - sspai 图片下载必须带 `Referer: https://sspai.com/` 头
 - 单个 `rich_text` content 上限 2000 字符，超长需拆分（实测用 1990 字符截断更安全）
 - 每次创建页面 `children` 上限 100 个 blocks
