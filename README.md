@@ -4,47 +4,58 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 
 ## Agent 列表
 
-| Agent | 描述 |
-|------|------|
-| `para-notes-agent` | PARA 笔记管理专家，基于 Apple Notes 整理、分类、清理笔记 |
-| `quality-info-reviewer` | 高质量信息审查员，按 10 条标准评估 URL 或文本，判定是否值得读 |
-| `weekly-tool-digest-agent` | 工具箱周报生成器，查询 Notion 工具箱最近一周新增工具并生成结构化汇总报告 |
+| Agent | 版本 | 描述 |
+|-------|------|------|
+| `para-notes-agent` | 1.0.0 | PARA 笔记管理专家，基于 Apple Notes 整理、分类、清理笔记 |
+| `quality-info-reviewer` | 1.2.0 | 高质量信息审查员，按 10 条标准评估 URL 或文本，判定是否值得读 |
+| `weekly-tool-digest-agent` | 1.1.0 | 工具箱周报生成器，查询 Notion 工具箱最近一周新增工具并生成结构化汇总报告 |
 
 ## 技能列表
 
 ### 内容采集
 
-| 技能 | 描述 |
-|------|------|
-| `hackernews-digest` | 获取 Hacker News 热门文章并生成每日摘要 |
+| 技能 | 版本 | 描述 |
+|------|------|------|
+| `hackernews-digest` | 1.1.0 | 获取 Hacker News 热门文章并生成每日摘要 |
 
 ### 内容保存
 
-| 技能 | 描述 |
-|------|------|
-| `url-to-notion` | 抓取文章全文，裁剪后保存到 Notion 整理笔记 |
-| `tool-save-to-notion` | 将工具链接保存到 Notion 工具箱 |
+| 技能 | 版本 | 描述 |
+|------|------|------|
+| `url-to-notion` | 1.1.0 | 抓取文章全文，裁剪后保存到 Notion 整理笔记 |
+| `tool-save-to-notion` | 1.1.0 | 将工具链接保存到 Notion 工具箱 |
 
 ### 内容创作
 
-| 技能 | 描述 |
-|------|------|
-| `article-images-gen` | 为文章生成手绘风格插图 |
-| `tool-share` | 调研工具并生成结构化分享文章 |
-| `music-notes` | 深度音乐研究，生成音乐笔记并写入 Notion |
+| 技能 | 版本 | 描述 |
+|------|------|------|
+| `article-images-gen` | 1.0.5 | 为文章生成手绘风格插图 |
+| `tool-share` | 1.1.0 | 调研工具并生成结构化分享文章 |
+| `music-notes` | 1.1.0 | 深度音乐研究，生成音乐笔记并写入 Notion |
 
 ### 发布部署
 
-| 技能 | 描述 |
-|------|------|
-| `blog-push` | Hugo 博客文章智能发布工具 |
+| 技能 | 版本 | 描述 |
+|------|------|------|
+| `blog-push` | 1.1.0 | Hugo 博客文章智能发布工具 |
 
 ### 工具基础设施
 
-| 技能 | 描述 |
-|------|------|
-| `r2-uploader` | 上传文件到 Cloudflare R2 对象存储 |
+| 技能 | 版本 | 描述 |
+|------|------|------|
+| `r2-uploader` | 1.1.0 | 上传文件到 Cloudflare R2 对象存储 |
 
 ## 许可证
 
 MIT
+
+## 版本管理
+
+每个技能/Agent 独立版本，遵循 [SemVer](https://semver.org/)。完整变更记录见 [CHANGELOG.md](./CHANGELOG.md)。
+
+发版流程：
+
+```bash
+# 使用发布脚本（自动更新 SKILL.md、CHANGELOG、README、打 tag）
+./scripts/release.sh <skill-name> <new-version>
+```
