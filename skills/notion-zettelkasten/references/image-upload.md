@@ -2,14 +2,14 @@
 
 ## Notion Files API
 
-Notion Files API 可直接上传图片到 Notion 托管存储。
+Notion 2025 年新增 Files API，可直接上传图片到 Notion 托管存储。
 
 ### 单文件上传流程（< 5MB）
 
 ```python
 import json, subprocess, os
 
-NOTION_KEY = "<from NOTION_API_TOKEN env>"
+NOTION_KEY = open(os.path.expanduser("~/.config/notion/api_key")).read().strip()
 
 # 1. 创建上传对象
 r = subprocess.run(["curl", "-s", "-X", "POST",

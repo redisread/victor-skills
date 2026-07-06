@@ -16,20 +16,21 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 
 | 技能 | 版本 | 描述 |
 |------|------|------|
-| `notion-zettelkasten` | 1.0.0 | Notion 卡片盒笔记系统（Zettelkasten）管理工具，支持文献笔记、灵感笔记、永久笔记的查询与创建，工具箱与领域管理 |
+| `notion-zettelkasten` | 1.1.1 | Notion 卡片盒笔记系统（Zettelkasten）管理工具，支持文献笔记、灵感笔记、永久笔记的查询与创建，工具箱与领域管理，URL保存文章和工具 |
 
-### 内容保存
+### 内容保存（已合并到 notion-zettelkasten）
 
-| 技能 | 版本 | 描述 |
-|------|------|------|
-| `url-to-notion` | 1.1.0 | 抓取文章全文，裁剪后保存到 Notion 整理笔记 |
-| `tool-save-to-notion` | 1.1.0 | 将工具链接保存到 Notion 工具箱 |
+以下技能已合并到 notion-zettelkasten，不再单独维护：
+
+- ~~`url-to-notion`~~ → 功能 12：URL 保存到文献笔记
+- ~~`tool-save-to-notion`~~ → 功能 13：URL 保存到工具箱
 
 ### 内容创作
 
 | 技能 | 版本 | 描述 |
 |------|------|------|
 | `raft-article-illustrator` | 3.0.0 | Raft 风格插图提示词——用类比而非图解，输出可直接用于 Midjourney / Gemini / DALL-E |
+| `raft-essay` | 1.5.0 | 撰写工程哲学风格的长文，聚焦 AI Agent 协作与人机边界 |
 
 ### 发布部署
 
