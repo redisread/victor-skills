@@ -12,12 +12,6 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 
 ## 技能列表
 
-### 内容采集
-
-| 技能 | 版本 | 描述 |
-|------|------|------|
-| `hackernews-digest` | 1.1.0 | 获取 Hacker News 热门文章并生成每日摘要 |
-
 ### 知识管理
 
 | 技能 | 版本 | 描述 |
@@ -35,9 +29,7 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 
 | 技能 | 版本 | 描述 |
 |------|------|------|
-| `article-images-gen` | 1.0.5 | 为文章生成手绘风格插图 |
-| `tool-share` | 1.1.0 | 调研工具并生成结构化分享文章 |
-| `music-notes` | 1.1.0 | 深度音乐研究，生成音乐笔记并写入 Notion |
+| `raft-article-illustrator` | 3.0.0 | Raft 风格插图提示词——用类比而非图解，输出可直接用于 Midjourney / Gemini / DALL-E |
 
 ### 发布部署
 
