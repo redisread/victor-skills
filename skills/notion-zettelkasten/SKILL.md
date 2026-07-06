@@ -443,11 +443,12 @@ curl -s -X PATCH "https://api.notion.com/v1/pages/$PAGE_ID" \
 **⚠️ 正文规则：**
 - **不添加任何额外内容**：不要 `📝 摘要`、`📖 正文` 等标题，不要概述，不要总结
 - 直接将原文完整内容写入正文 blocks，逐段对应
-- 如果原文是英文 → 逐段翻译为简体中文后写入，保持段落数量和顺序不变
+- **如果原文是英文 → 逐段翻译为简体中文后写入**，保持段落数量和顺序不变
 - 如果原文是中文 → 直接写入正文
-- 翻译要求：忠实原文，保留技术术语准确性，不意译不概括，不改写不删减
+- **翻译要求：忠实原文完整内容，不做摘要不删减，保留段落结构，技术术语可保留英文并括号标注中文**
 - 图片插入到正文中对应位置（如有），或集中放在正文末尾
 - 单段超过 1990 字符时拆分为多个 paragraph block
+- **注意：翻译工作由 Claude 在构建 children blocks 时直接完成。不需要调用外部翻译 API。Claude 读取提取的英文内容后，直接输出翻译后的中文段落，然后写入 Notion blocks。**
 
 ### Step 1：抓取内容
 
@@ -596,11 +597,11 @@ for img_path in sorted(os.listdir(IMG_DIR)):
     time.sleep(0.5)  # Rate limit: ~2 req/s
 ```
 
-### Step 4.5：语言检测 + 英文翻译
+### Step 4.5：语言检测 + 英文翻译（必须执行）
 
-提取的正文如果是英文，需翻译为简体中文。**翻译必须逐段进行，保留原文完整内容，不做摘要不删减。**
+提取的正文如果是英文，**必须翻译为简体中文后写入 Notion**。**翻译是强制步骤，不可跳过。**
 
-**翻译规则：**
+**翻译要求：**
 - 逐段翻译，保持原文段落结构和顺序
 - 技术术语保留英文原文或标注（如 "Agent（智能体）"）
 - 代码片段、URL、专有名词不翻译
@@ -646,6 +647,29 @@ else:
 ```
 
 **注意：** 翻译工作由 Claude 在构建 children blocks 时直接完成。不需要调用外部翻译 API。Claude 读取提取的英文内容后，直接输出翻译后的中文段落，然后写入 Notion blocks。
+
+**翻译示例：**
+
+原文：
+> Nobody starts with a perfect workflow. In the beginning, you usually only have a rough sense of the problem, a few strong intuitions, and some obvious constraints.
+
+翻译后：
+> 没有人一开始就有完美的工作流。起初，你通常只对问题有一个粗略的感知、一些强烈的直觉，以及一些明显的约束条件。
+
+**翻译示例：**
+
+原文：
+> Nobody starts with a perfect workflow. In the beginning, you usually only have a rough sense of the problem, a few strong intuitions, and some obvious constraints.
+
+翻译后：
+> 没有人一开始就有完美的工作流。起初，你通常只对问题有一个粗略的感知、一些强烈的直觉，以及一些明显的约束条件。
+
+**翻译规则：**
+1. 保留代码块不翻译
+2. 保留 URL 不翻译
+3. 技术术语可保留英文并括号标注中文（如 "Agent（智能体）"）
+4. 保持段落结构不变
+5. 翻译质量要求：准确、自然、可读，不要机翻感
 
 ### Step 5：创建文献笔记页面（含封面 + 正文 + 图片 blocks + 领域）
 
