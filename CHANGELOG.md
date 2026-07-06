@@ -133,3 +133,8 @@
 - `reddit-daily-digest` — Reddit 每日摘要
 - `reddit-digest` — Reddit 摘要（被 hackernews-digest 替代）
 - `x-following-digest` — Twitter/X 关注摘要
+
+### notion-zettelkasten
+
+#### [1.1.0] - 2026-07-06
+- 合并 url-to-notion 和 tool-save-to-notion 触发词，统一由 notion-zettelkasten 管理

@@ -22,7 +22,7 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 
 | 技能 | 版本 | 描述 |
 |------|------|------|
-| `notion-zettelkasten` | 1.0.0 | Notion 卡片盒笔记系统（Zettelkasten）管理工具，支持文献笔记、灵感笔记、永久笔记的查询与创建，工具箱与领域管理 |
+| `notion-zettelkasten` | 1.1.0 | Notion 卡片盒笔记系统（Zettelkasten）管理工具，支持文献笔记、灵感笔记、永久笔记的查询与创建，工具箱与领域管理 |
 
 ### 内容保存
 
