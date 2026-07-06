@@ -90,6 +90,18 @@ metadata:
 
 修改 skill / agent 行为时同步更新 `version`；只改仓库级文档可以不改 skill 版本。
 
+### 版本同步规则（强制）
+
+**每次修改 `SKILL.md` 或 Agent 定义文件的版本号时，必须同步更新 `README.md` 中对应的版本号。**
+
+CI 会自动检查版本一致性。推送前必须运行校验脚本：
+
+```bash
+./scripts/check-version-consistency.sh
+```
+
+如果校验失败，先更新 README 中的版本号再推送。
+
 ## Local Install / Smoke Test
 
 单个 skill：
@@ -145,9 +157,12 @@ PR/交付前检查：
 - `name` 与目录名一致，使用 kebab-case
 - `description` 足够触发，但不过度泛化
 - 版本号按 SemVer 更新
+- **README 版本同步**：运行 `./scripts/check-version-consistency.sh` 确认版本一致
 - README 列表同步
 - 本地安装命令通过
 - 没有泄露凭据、本机隐私路径或过期命令
+
+**推送前必做**：运行版本一致性校验，确保 CI 不会因版本不同步而失败。
 
 ## Common Gotchas
 
