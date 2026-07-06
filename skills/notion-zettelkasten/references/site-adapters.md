@@ -8,6 +8,15 @@
 opencli web article "<URL>" -f json > /tmp/article_<id>.json
 ```
 
+回退方案：`agent-browser`：
+
+```bash
+agent-browser open "<URL>"
+agent-browser wait --load networkidle
+agent-browser wait 3000
+agent-browser get text body --json
+```
+
 ## X/Twitter 特殊处理
 
 统一使用 `opencli twitter` 系列：
@@ -40,6 +49,10 @@ opencli twitter download --tweet-url "<X URL>" -f json --output /tmp/x_dl_<id>
 ```bash
 curl -sL -H "Referer: https://sspai.com/" -o /tmp/sspai_<id>/img01.jpeg "<image_url>"
 ```
+
+## 知乎
+
+需要浏览器渲染，图片需带 Referer 头下载。
 
 ## 页面抓取失败处理
 
