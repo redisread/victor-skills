@@ -32,6 +32,12 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 | `raft-article-illustrator` | 6.0.0 | 极简手绘风格插图提示词——用类比而非图解，输出中文提示词可直接用于 Midjourney / Gemini / DALL-E |
 | `raft-essay` | 1.6.0 | 撰写工程哲学风格的长文，聚焦 AI Agent 协作与人机边界 |
 
+### 产品设计
+
+| 技能 | 版本 | 描述 |
+|------|------|------|
+| `user-experience-design` | 1.0.0 | 用户体验设计方法框架（基于《体验经济》）——顾客损失清单、主题化、峰终定律、游戏化，先跑体验目标再落地 UI（by Steven） |
+
 ### 发布部署
 
 | 技能 | 版本 | 描述 |
