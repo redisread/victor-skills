@@ -2,11 +2,11 @@
 name: raft-article-illustrator
 description: >
   生成极简手绘风格插图提示词。风格：简单线条、最少元素、留白为主、无文字。
-  输出可直接用于 Midjourney / Gemini / DALL-E 的生图提示词。
+  输出中文生图提示词，可直接用于 Midjourney / Gemini / DALL-E 等工具。
   Use when user says "为文章配图", "生成插图提示词",
   "article illustrations", "generate image prompts",
   "给这篇文章画插图", "raft 风格配图", "生成极简插图".
-version: 5.0.0
+version: 6.0.0
 metadata:
   homepage: https://github.com/redisread/victor-skills#raft-article-illustrator
 ---
@@ -49,7 +49,7 @@ metadata:
 
 - 生成的图不带任何文字、字母、数字
 - 用符号、形状、线条表达概念，不用文字标注
-- 如果需要标注，在 prompt 中明确说明「no text, no words, no letters」
+- 如果需要标注，在 prompt 中明确说明「画面不含任何文字、字母、数字」
 
 ## 提示词工艺
 
@@ -58,7 +58,7 @@ metadata:
 1. **找到类比**：这个论点的视觉类比是什么？
 2. **构建极简构图**：这个类比如何用最简单的线条表达？哪些是核心元素、哪些是留白
 3. **约束风格**：简单线条、最少元素、留白为主、无文字
-4. **输出英文 prompt**：可直接喂给图片生成工具，明确标注「no text, no words, no letters」
+4. **输出中文 prompt**：可直接喂给图片生成工具，明确标注「画面不含任何文字、字母、数字」
 
 ### 思考过程
 
@@ -84,8 +84,8 @@ metadata:
 **视觉描述**：
 {2-3 句话描述画面。具体到核心元素、线条结构、留白比例}
 
-**Prompt (EN)**：
-{英文 prompt，可直接用于 Midjourney / Gemini / DALL-E，必须包含 "no text, no words, no letters"}
+**Prompt（中文）**：
+{中文 prompt，可直接用于 Midjourney / Gemini / DALL-E，必须包含「画面不含任何文字、字母、数字」}
 
 ---
 ```
@@ -94,9 +94,9 @@ metadata:
 
 | 坏 | 好 | 为什么好 |
 |----|-----|---------|
-| "画一个关于信任的图" | "Minimal hand-drawn illustration: a simple timeline symbol with a heart, no text, no words, no letters" | 极简、无文字、有类比 |
-| "Draw a wireframe about agents" | "Simple line drawing: two connected circles with minimal details, no text, no words, no letters" | 简单线条、最少元素 |
-| "画一个 AI 和人类协作" | "Hand-drawn minimal illustration: two abstract figures connected by a simple line, no text, no words, no letters" | 用符号表达关系 |
+| "画一个关于信任的图" | "极简手绘插图：一条简单的时间线符号，旁边一颗心形，画面不含任何文字、字母、数字" | 极简、无文字、有类比 |
+| "画一个关于 agent 的线框图" | "简单线条画：两个相连的圆形，细节最少，画面不含任何文字、字母、数字" | 简单线条、最少元素 |
+| "画一个 AI 和人类协作" | "极简手绘插图：两个抽象人形由一条简单线条连接，画面不含任何文字、字母、数字" | 用符号表达关系 |
 
 关键区别：好的提示词描述的是**用极简线条表达的核心关系**，不是复杂场景。
 
@@ -137,8 +137,8 @@ metadata:
 
 - [ ] 每条提示词是否从类比生长，而非直接描述论点？
 - [ ] 是否使用极简线条，而非复杂场景？
-- [ ] 是否明确标注「no text, no words, no letters」？
-- [ ] 英文 prompt 是否可以直接复制使用？
+- [ ] 是否明确标注「画面不含任何文字、字母、数字」？
+- [ ] 中文 prompt 是否可以直接复制使用？
 - [ ] 是否避免了多余装饰（渐变、圆角、花哨效果）？
 - [ ] 插图密度是否合理——不是越多越好？
 
@@ -148,12 +148,12 @@ metadata:
 - **堆砌元素**：一张图塞多个元素 → 一张图 1 个核心关系
 - **风格漂移**：用了渐变或圆角 → 只有简单线条 + 留白
 - **缺少极简原则**：元素过多、细节过密 → 必须用最少元素
-- **中文 prompt**：图片生成工具对英文效果更好 → 必须输出英文
-- **带文字**：生成的图包含文字 → 必须标注「no text, no words, no letters」
+- **英文 prompt**：输出语言必须是中文 → 用中文描述画面
+- **带文字**：生成的图包含文字 → 必须标注「画面不含任何文字、字母、数字」
 
 ## 降级方案
 
 - 如果用户没有指定内容：提示用户提供内容路径或粘贴文本
 - 如果内容太短（< 500 字）：建议 minimal 密度，1 张即可
 - 如果内容没有明确章节结构：根据论点转折拆分，而非根据标题
-- 如果用户需要文字标注：明确说明「no text」原则，建议后期添加
+- 如果用户需要文字标注：明确说明「无文字」原则，建议后期添加
