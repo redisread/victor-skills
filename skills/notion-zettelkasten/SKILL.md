@@ -1,6 +1,7 @@
+---
 name: notion-zettelkasten
 description: "Notion 卡片盒笔记系统（Zettelkasten）管理工具。支持查询和创建文献笔记、灵感笔记、永久笔记（含正文），查询/创建/删除工具箱，URL保存工具到工具箱，查询领域，URL保存文章到文献笔记。触发词：文献笔记、灵感笔记、永久笔记、卡片笔记、工具箱、领域查询、记笔记、记灵感、收集文献、保存文章、保存工具、url-to-notion、zettelkasten、保存文章到 Notion、裁剪文章、保存到整理笔记、保存这个工具、添加到工具箱、收藏这个链接、save this tool、add to toolbox。当用户提到 Notion 笔记的查询、创建、删除或 URL 保存时使用。"
-version: 1.1.1
+version: 1.1.2
 metadata:
   homepage: https://github.com/victor-skills#notion-zettelkasten
 
