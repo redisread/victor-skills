@@ -147,3 +147,15 @@
 - 初始版本，收录自 Steven 的用户体验设计方法框架
 - 基于《体验经济》8 条核心思想：体验式营销、CEM、数字化、定制化、顾客损失、记忆点、游戏化、主题化
 - 输出结构：体验目标 → 顾客损失清单 → 主题构思 → 记忆点/定制化 → 落地清单
+
+---
+
+### emil-motion-design
+
+#### [1.0.0] - 2026-07-20
+- 初始版本，基于 Emil Kowalski（Linear / 前 Vercel 设计工程师，Sonner/Vaul 作者）公开分享汇编
+- 5 条核心原则（Purposeful Motion 五问）：目的 / 频率 / easing / origin / 可中断
+- 8 维度审计框架：Purpose & Frequency / Easing & Duration / Physicality / Interruptibility / Performance / Accessibility / Cohesion / Missed Opportunities
+- 10 条即用动画模式 + 80+ 词汇表 + Sonner/Vaul 完整设计复盘
+- References：timing-easing / patterns / vocabulary / components / audit-template / tools
+- 明确标注：不含 animations.dev/motion 付费内容；Vaul 已被作者标注 unmaintained

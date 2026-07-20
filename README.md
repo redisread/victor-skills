@@ -37,6 +37,7 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 | 技能 | 版本 | 描述 |
 |------|------|------|
 | `user-experience-design` | 1.0.0 | 用户体验设计方法框架（基于《体验经济》）——顾客损失清单、主题化、峰终定律、游戏化，先跑体验目标再落地 UI（by Steven） |
+| `emil-motion-design` | 1.0.0 | Web UI 动效与微交互设计方法框架（基于 Emil Kowalski 公开分享）——Purposeful Motion 5 原则、8 维度审计、10 条模式、80+ 词汇 |
 
 ### 发布部署
 
