@@ -136,6 +136,11 @@
 
 ### notion-zettelkasten
 
+#### [1.1.4] - 2026-07-22
+- 功能 12（URL 保存到文献笔记）优化图片插入位置：优先按原始结构穿插，无精确位置时按段落均匀分布
+- 新增 X Article（fxtwitter）精确位置解析：通过 `atomic` block + `entityMap` 中的 `MEDIA` 实体定位图片
+- 认证指引补充：默认从 `~/.config/notion/env.sh` 加载 `NOTION_API_TOKEN`
+
 #### [1.1.0] - 2026-07-06
 - 合并 url-to-notion 和 tool-save-to-notion 触发词，统一由 notion-zettelkasten 管理
 
