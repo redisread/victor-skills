@@ -1,7 +1,7 @@
 ---
 name: notion-zettelkasten
 description: "Notion 卡片盒笔记系统（Zettelkasten）管理工具。支持查询和创建文献笔记、灵感笔记、永久笔记（含正文），查询/创建/删除工具箱，URL保存工具到工具箱，查询领域，URL保存文章到文献笔记。触发词：文献笔记、灵感笔记、永久笔记、卡片笔记、工具箱、领域查询、记笔记、记灵感、收集文献、保存文章、保存工具、url-to-notion、zettelkasten、保存文章到 Notion、裁剪文章、保存到整理笔记、保存这个工具、添加到工具箱、收藏这个链接、save this tool、add to toolbox。当用户提到 Notion 笔记的查询、创建、删除或 URL 保存时使用。"
-version: 1.1.2
+version: 1.1.4
 metadata:
   homepage: https://github.com/victor-skills#notion-zettelkasten
 
@@ -17,7 +17,10 @@ metadata:
 
 ```bash
 # 环境变量 NOTION_API_TOKEN 必须已设置
-# 如未设置，提示用户设置：
+# 默认从 ~/.config/notion/env.sh 加载：
+source ~/.config/notion/env.sh
+
+# 如该文件不存在或为空，提示用户设置：
 export NOTION_API_TOKEN="ntn_xxx..."
 ```
 
@@ -475,12 +478,31 @@ curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_art
 # 文章正文在 .tweet.article.content.blocks[]
 # 封面图在 .tweet.article.cover_media.media_info.original_img_url
 # 内容图片在 .tweet.article.media_entities[].media_info.original_img_url
+# 图片位置：类型为 "atomic" 的 block，通过 entityMap 中的 MEDIA 实体关联到 media_id
+```
+
+**记录图片位置（强烈建议）：**
+
+不同来源对图片位置的表达能力不同。尽量在抓取阶段就把图片和它附近的文本段落关联起来，供 Step 5 使用：
+
+| 来源 | 可获取的位置信息 | 处理方式 |
+|------|----------------|---------|
+| HTML 网页 | `<img>` 出现在第 N 个段落之后 | 给该图片标注 `block_index = N` |
+| X Article (fxtwitter) | `atomic` block + `entityMap` 中的 `MEDIA` 实体，可映射到 media_id | 按文本块顺序计算 `block_index`，精确插入 |
+| agent-browser / opencli web | 可能返回带图片位置的 JSON | 优先使用解析器给出的索引 |
+
+图片对象建议统一为：
+
+```python
+{"url": "...", "file_id": "...", "block_index": 5}  # block_index 可选，越小位置越靠前
 ```
 
 **X/Twitter 图片处理：**
 
 fxtwitter 返回的图片 URL 来自 pbs.twimg.com，本地环境可能无法直接下载。
-使用 Notion `external` 图片类型，让 Notion 直接从 URL 加载，无需本地下载上传：
+使用 Notion `external` 图片类型，让 Notion 直接从 URL 加载，无需本地下载上传。
+
+同时要解析 `atomic` block 获取图片在正文中的精确位置：
 
 ```python
 import json
@@ -489,27 +511,42 @@ with open("/tmp/fx_article.json") as f:
     data = json.load(f)
 
 article = data.get("tweet", {}).get("article", {})
-image_blocks = []
+content = article.get("content", {})
+blocks = content.get("blocks", [])
+entity_map = {e["key"]: e["value"] for e in content.get("entityMap", [])}
 
-# 提取封面图
+# media_id -> URL
+media_id_to_url = {
+    str(m.get("media_id")): m["media_info"]["original_img_url"]
+    for m in article.get("media_entities", [])
+    if m.get("media_info", {}).get("original_img_url")
+}
+
+image_positions = []  # list of (block_index, url)
+text_block_index = 0
+
+for raw_idx, b in enumerate(blocks):
+    if b.get("type") == "atomic":
+        for er in b.get("entityRanges", []):
+            ent = entity_map.get(str(er["key"]), {})
+            if ent.get("type") == "MEDIA":
+                for item in ent.get("data", {}).get("mediaItems", []):
+                    mid = str(item.get("mediaId", ""))
+                    url = media_id_to_url.get(mid)
+                    if url:
+                        # 图片应插入在第 text_block_index 个文本块之后
+                        image_positions.append((text_block_index - 1, url))
+    elif b.get("text", "").strip():
+        text_block_index += 1
+
+# 封面图单独处理
 cover_url = article.get("cover_media", {}).get("media_info", {}).get("original_img_url", "")
-if cover_url:
-    image_blocks.append({
-        "object": "block", "type": "image",
-        "image": {"type": "external", "external": {"url": cover_url}}
-    })
 
-# 提取内容图片
-for m in article.get("media_entities", []):
-    img_url = m.get("media_info", {}).get("original_img_url", "")
-    if img_url:
-        image_blocks.append({
-            "object": "block", "type": "image",
-            "image": {"type": "external", "external": {"url": img_url}}
-        })
-
-# 将 image_blocks 追加到 children 数组中
-# 建议放在正文末尾、来源 callout 之前，加一个 "🖼️ 文章配图" heading
+# 内容图片按位置包装成 image 对象
+content_images = [
+    {"url": url, "block_index": idx}
+    for idx, url in image_positions
+]
 ```
 
 **图片类型选择策略：**
@@ -720,13 +757,13 @@ for para in text_paragraphs:
                 "paragraph": {"rich_text": [{"type": "text", "text": {"content": chunk}}]}
             })
 
-# 插入图片 blocks（第一张已设为封面，不重复插入）
-# 注意：图片放在正文段落之后、divider 之前
-for img in inline_images:
-    children.append({
-        "object": "block", "type": "image",
-        "image": {"type": "file_upload", "file_upload": {"id": img["file_id"]}}
-    })
+# 插入图片 blocks：按原始结构穿插，而不是全部堆在末尾
+# 优先使用来源解析器提供的 block_index；没有时按段落数均匀分布
+children = interleave_paragraphs_and_images(
+    paragraphs=text_paragraphs,
+    images=inline_images,
+    max_blocks=98  # 预留 divider + callout
+)
 
 # 来源 callout
 children.append({"object": "block", "type": "divider", "divider": {}})
@@ -738,10 +775,85 @@ children.append({"object": "block", "type": "callout", "callout": {
 # 注意: children 总数不超过 100 个 block（Notion API 限制）
 ```
 
+**图片穿插函数示例：**
+
+```python
+def interleave_paragraphs_and_images(paragraphs, images, max_blocks=98):
+    """
+    把图片按原始结构穿插到段落之间。
+
+    - 如果 image 字典里有 'block_index'，表示解析器已给出在原文中的位置，直接按索引插入。
+    - 否则按段落数均匀分布：每 ceil(N_paragraphs / N_images) 个段落后放一张图。
+    - 若总 blocks 超过 max_blocks，优先保留文字段落，按比例丢弃尾部图片。
+    """
+    text_blocks = []
+    for para in paragraphs:
+        if len(para) <= 1990:
+            text_blocks.append({"object": "block", "type": "paragraph",
+                                "paragraph": {"rich_text": [{"type": "text", "text": {"content": para}}]}})
+        else:
+            for i in range(0, len(para), 1990):
+                text_blocks.append({"object": "block", "type": "paragraph",
+                                    "paragraph": {"rich_text": [{"type": "text", "text": {"content": para[i:i+1990]}}]}})
+
+    # 按 block_index 排序，无索引的排最后
+    positioned = [(img.get("block_index", float("inf")), img) for img in images]
+    positioned.sort(key=lambda x: x[0])
+
+    children = []
+    img_idx = 0
+    n_text = len(text_blocks)
+    n_images = len(positioned)
+    # 均匀分布的步长
+    step = max(1, n_text // max(n_images, 1)) if n_images > 0 else n_text
+
+    for text_idx, block in enumerate(text_blocks):
+        children.append(block)
+        # 有 block_index 的图片：在当前文本块之后插入所有 block_index 落在此处的图片
+        while img_idx < n_images:
+            idx, img = positioned[img_idx]
+            # 已提供明确位置且 <= 当前文本索引，插入
+            if idx != float("inf") and idx <= text_idx:
+                children.append(image_block(img))
+                img_idx += 1
+            else:
+                break
+        # 无 block_index 的图片：按均匀步长插入
+        if img_idx < n_images and positioned[img_idx][0] == float("inf"):
+            if (text_idx + 1) % step == 0:
+                children.append(image_block(positioned[img_idx][1]))
+                img_idx += 1
+
+    # 若还有剩余图片（原文末尾）
+    while img_idx < n_images:
+        children.append(image_block(positioned[img_idx][1]))
+        img_idx += 1
+
+    # 超限保护：优先保留文字段落
+    if len(children) > max_blocks:
+        text_part = [b for b in children if b["type"] != "image"]
+        image_part = [b for b in children if b["type"] == "image"]
+        keep_images = min(len(image_part), max_blocks - len(text_part))
+        children = text_part + image_part[:keep_images]
+
+    return children
+
+
+def image_block(img):
+    """根据 img 字典构建 Notion image block（支持 file_upload / external）。"""
+    if img.get("file_id"):
+        return {"object": "block", "type": "image",
+                "image": {"type": "file_upload", "file_upload": {"id": img["file_id"]}}}
+    return {"object": "block", "type": "image",
+            "image": {"type": "external", "external": {"url": img["url"]}}}
+```
+
 **图片插入策略：**
 - `file_upload` 类型图片可直接包含在创建页面的 `children` 中
 - `external` 类型图片（如 X/Twitter pbs.twimg.com）也可包含在 `children` 中，Notion 会从 URL 加载
-- 图片放在正文段落之后、divider 和 callout 之前
+- **优先按原始结构插入**：HTML 解析时记录 `<img>` 所在的段落位置；JSON 解析时使用解析器提供的 `block_index`
+- **无精确位置时均匀分布**：不要把所有图片放到正文末尾
+- 超出 `max_blocks` 时优先保留文字段落，按比例丢弃尾部图片
 - 不要先创建页面再追加图片（容易产生重复），在创建时一次性包含所有 blocks
 ```
 
