@@ -136,6 +136,11 @@
 
 ### notion-zettelkasten
 
+#### [1.1.5] - 2026-07-22
+- 新增微信公众号文章适配：图片防盗链处理、标题多选择器 fallback、段落结构保留
+- 新增解析脚本 `references/scripts/wechat-parser.py`
+- 在 `references/site-adapters.md` 补充微信公众号抓取与图片下载规则
+
 #### [1.1.4] - 2026-07-22
 - 功能 12（URL 保存到文献笔记）优化图片插入位置：优先按原始结构穿插，无精确位置时按段落均匀分布
 - 新增 X Article（fxtwitter）精确位置解析：通过 `atomic` block + `entityMap` 中的 `MEDIA` 实体定位图片

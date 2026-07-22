@@ -1,7 +1,7 @@
 ---
 name: notion-zettelkasten
 description: "Notion 卡片盒笔记系统（Zettelkasten）管理工具。支持查询和创建文献笔记、灵感笔记、永久笔记（含正文），查询/创建/删除工具箱，URL保存工具到工具箱，查询领域，URL保存文章到文献笔记。触发词：文献笔记、灵感笔记、永久笔记、卡片笔记、工具箱、领域查询、记笔记、记灵感、收集文献、保存文章、保存工具、url-to-notion、zettelkasten、保存文章到 Notion、裁剪文章、保存到整理笔记、保存这个工具、添加到工具箱、收藏这个链接、save this tool、add to toolbox。当用户提到 Notion 笔记的查询、创建、删除或 URL 保存时使用。"
-version: 1.1.4
+version: 1.1.5
 metadata:
   homepage: https://github.com/victor-skills#notion-zettelkasten
 
@@ -480,6 +480,11 @@ curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_art
 # 内容图片在 .tweet.article.media_entities[].media_info.original_img_url
 # 图片位置：类型为 "atomic" 的 block，通过 entityMap 中的 MEDIA 实体关联到 media_id
 ```
+
+**微信公众号：**
+
+微信公众号文章 HTML 结构稳定，但图片有防盗链，需用 `file_upload` 上传。
+详见 [references/site-adapters.md](references/site-adapters.md) 的「微信公众号」章节，并提供了解析脚本 `references/scripts/wechat-parser.py`。
 
 **记录图片位置（强烈建议）：**
 
