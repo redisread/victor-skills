@@ -2,25 +2,24 @@
 
 ## 通用抓取
 
-优先使用 `opencli web read`（支持 JS 渲染，会同时下载页面图片到本地 `images/` 目录）：
+<<<<<<< HEAD
+优先使用 `opencli web read`（支持 JS 渲染，默认下载图片到本地）：
 
 ```bash
 mkdir -p /tmp/article_<id>
-opencli web read --url "<URL>" --output /tmp/article_<id>
-# 输出通常在 /tmp/article_<id>/<title>/<title>.md
-# 图片在 /tmp/article_<id>/<title>/images/
+opencli web read --url "<URL>" --output /tmp/article_<id> -f json > /tmp/article_meta_<id>.json
 ```
+
+- 输出目录下会生成 `.md` 正文文件和 `images/` 目录
+- 图片默认已下载到本地，可直接走 Notion `file_upload`
+- 返回的 JSON 元数据包含 `title`, `author`, `publish_time`, `saved`（Markdown 文件路径）
 
 微信公众号、需要登录或重 JS 的站点，统一用 `opencli web read`；curl 直接抓大概率返回验证页。
 
-回退方案：`agent-browser`：
+**回退方案（按优先级）：**
 
-```bash
-agent-browser open "<URL>"
-agent-browser wait --load networkidle
-agent-browser wait 3000
-agent-browser get text body --json
-```
+1. `agent-browser open "<URL>"` + `get html body --json` / `get text body --json`
+2. `curl -sL --max-time 15 -H "User-Agent: Mozilla/5.0" "<URL>"` — 仅适用于非 JS 渲染页面，图片需单独下载
 
 ## X/Twitter 特殊处理
 
@@ -40,22 +39,41 @@ opencli twitter article "<X URL>" -f json > /tmp/x_<id>.json
   - X Article 正文在 `.tweet.article.content.blocks[]`
 
 ### 2. 下载图片/附件
+
+**优先 `opencli twitter download`**（需要 opencli 已配置 Twitter 登录态）：
+
 ```bash
 opencli twitter download --tweet-url "<X URL>" -f json --output /tmp/x_dl_<id>
 ```
+
 - 文件保存在 `/tmp/x_dl_<id>/tweets/` 目录
 - 命名：`tweet_1.jpg`, `tweet_2.png`...
-- 需要 opencli 已配置 Twitter 登录态
 
-**如果 opencli download 不可用或未登录**：用 fxtwitter API 取媒体 URL：
+**其次 `opencli web read`**（浏览器渲染，可下载页面中的图片）：
+
+```bash
+opencli web read --url "<X URL>" --output /tmp/x_web_<id> -f json
+```
+
+- 输出目录下会生成 `.md` 和 `images/` 目录
+- 适用于 `opencli twitter download` 失败或没有媒体但页面仍有图的情况
+
+**最后 fxtwitter API**（仅取 URL，不下载文件）：
+
+```bash
+curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_<id>.json
+```
+
 - 普通推文媒体：`.tweet.media.all[].url`
 - X Article 媒体：`.tweet.article.media_entities[].media_info.original_img_url`
 - 这些 URL 来自 `pbs.twimg.com`，本地可能不可达，直接在 Notion 中使用 `external` image block
 
 ### 3. 写入页面
-- 第一张图片作封面（`external` URL）
-- 剩余图片按原文顺序插入正文（`external` image block）
-- X Article 可通过 `atomic` block + `entityMap` 精确还原图片位置（详见 `references/site-adapters.md` 或 SKILL.md 功能 12）
+
+- 本地已下载的图片 → `file_upload` image block
+- `pbs.twimg.com` 等远程 URL → `external` image block
+- 第一张图片作封面，其余按原文顺序插入正文
+- X Article 可通过 `atomic` block + `entityMap` 精确还原图片位置（详见 SKILL.md 功能 12）
 
 ## 少数派（sspai）
 

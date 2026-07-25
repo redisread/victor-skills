@@ -459,21 +459,23 @@ curl -s -X PATCH "https://api.notion.com/v1/pages/$PAGE_ID" \
 
 按网站类型选择抓取方式（详见 [references/site-adapters.md](references/site-adapters.md)）：
 
-**通用网站（优先 opencli web read）：**
+<<<<<<< HEAD
+**通用网站（优先 `opencli web read`，默认下载图片）：**
 
 ```bash
 mkdir -p /tmp/article_<id>
-opencli web read --url "<URL>" --output /tmp/article_<id>
-# 输出目录结构：/tmp/article_<id>/<title>/<title>.md
-# 图片目录：/tmp/article_<id>/<title>/images/
+opencli web read --url "<URL>" --output /tmp/article_<id> -f json > /tmp/article_meta_<id>.json
 ```
+
+- 输出目录下生成 `.md` 正文文件和 `images/` 目录
+- 图片已下载到本地，可直接作为 `file_upload` 上传
+- 返回的 JSON 元数据含 `title`, `author`, `publish_time`, `saved`（Markdown 文件路径）
 
 微信公众号、少数派、知乎等需要 JS 渲染的站点，统一用 `opencli web read`；curl 直接抓大概率返回验证页或内容残缺。
 
 **回退方案（按优先级）：**
-1. `opencli web read --url "<URL>" --output /tmp/article_<id>` — 支持 JS 渲染，自动下载图片
-2. `agent-browser open "<URL>"` + `get text body --json` — 需要 playwright 已安装
-3. `curl` — 仅适用于非 JS 渲染页面
+1. `agent-browser open "<URL>"` + `get html body --json` / `get text body --json`
+2. `curl -sL --max-time 15 -H "User-Agent: Mozilla/5.0" "<URL>"` — 仅适用于非 JS 渲染页面，图片需单独下载
 
 **X/Twitter：**
 ```bash
@@ -487,7 +489,18 @@ opencli twitter download --tweet-url "<X URL>" -f json --output /tmp/x_dl
 - `opencli twitter article` 返回列表，普通推文/线程在 `content`，X Article 含 `title` + 完整正文
 - `opencli twitter download` 把媒体存到 `/tmp/x_dl/tweets/`，本地可直接读取
 
-**回退 fxtwitter API**（opencli 不可用时）：
+**图片回退：`opencli web read`**
+
+当 `opencli twitter download` 失败、未登录或没有返回媒体时，用浏览器渲染再试一次：
+
+```bash
+opencli web read --url "<X URL>" --output /tmp/x_web_<id> -f json
+```
+
+- 输出目录下生成 `.md` 和 `images/`
+- 下载到的本地图片走 `file_upload`
+
+**文本/图片回退：fxtwitter API**（opencli 完全不可用时）：
 
 ```bash
 curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_article.json
@@ -527,8 +540,8 @@ curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_art
 
 | 场景 | 方式 | 说明 |
 |------|------|------|
-| 普通网站图片 | `file_upload` | 先下载到本地，上传到 Notion Files API |
-| X/Twitter 图片 | `external` | pbs.twimg.com 本地可能不可达，用 external 让 Notion 直接加载 |
+| 普通网站图片 | `file_upload` | `opencli web read` 已下载到 `images/`；或手动下载后上传 |
+| X/Twitter 图片 | `file_upload` / `external` | opencli 下载的本地媒体用 `file_upload`；fxtwitter 的 `pbs.twimg.com` URL 用 `external` |
 | 需要防盗链的图片 | `external` + Referer | 少数派/知乎等，如果 Notion 无法访问则跳过 |
 
 **少数派/知乎：** 需浏览器渲染 + Referer 防盗链头。
