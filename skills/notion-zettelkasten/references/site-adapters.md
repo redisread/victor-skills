@@ -59,20 +59,6 @@ curl -sL -H "Referer: https://sspai.com/" -o /tmp/sspai_<id>/img01.jpeg "<image_
 
 需要浏览器渲染，图片需带 Referer 头下载。
 
-## Codewiki（AI 代码库百科）
-
-`https://codewiki.google/github.com/<owner>/<repo>` 会生成一份结构化仓库百科，页面通常很大（数百 KB）。
-
-- 抓取：`opencli web read --url "<URL>" --output /tmp/codewiki_<repo>`
-- 用途：工具箱入口卡片，不要全文归档
-- 提取：
-  - 工具名：`Code Wiki — <owner>/<repo> 代码百科`
-  - 简介：第一段项目概述（1-2 句）
-  - 用法：`把 github.com/<owner>/<repo> 替换为 codewiki.google/github.com/<owner>/<repo>`
-  - 类型：`网站`
-  - 标签：`开发工具`、`代码阅读`、`GitHub`
-- 正文里**跳过视频和架构图**，只保留文字和链接。
-
 ## 页面抓取失败处理
 
 1. `web_fetch` 对 JS 渲染页面无效 → 用 `opencli web read` 或 `agent-browser`
