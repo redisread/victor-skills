@@ -1,7 +1,7 @@
 ---
 name: notion-zettelkasten
 description: "Notion 卡片盒笔记系统（Zettelkasten）管理工具。支持查询和创建文献笔记、灵感笔记、永久笔记（含正文），查询/创建/删除工具箱，URL保存工具到工具箱，查询领域，URL保存文章到文献笔记。触发词：文献笔记、灵感笔记、永久笔记、卡片笔记、工具箱、领域查询、记笔记、记灵感、收集文献、保存文章、保存工具、url-to-notion、zettelkasten、保存文章到 Notion、裁剪文章、保存到整理笔记、保存这个工具、添加到工具箱、收藏这个链接、save this tool、add to toolbox。当用户提到 Notion 笔记的查询、创建、删除或 URL 保存时使用。"
-version: 1.1.4
+version: 1.1.5
 metadata:
   homepage: https://github.com/victor-skills#notion-zettelkasten
 
@@ -452,19 +452,26 @@ curl -s -X PATCH "https://api.notion.com/v1/pages/$PAGE_ID" \
 - **翻译要求：忠实原文完整内容，不做摘要不删减，保留段落结构，技术术语可保留英文并括号标注中文**
 - 图片插入到正文中对应位置（如有），或集中放在正文末尾
 - 单段超过 1990 字符时拆分为多个 paragraph block
+- **Markdown 内联格式必须转成 Notion rich_text**：`[文字](URL)` → 可点击链接，`**加粗**` → bold，`*斜体*` → italic。不要把 Markdown 源码当纯文本写进 Notion（详见 [references/markdown-to-notion-rich-text.md](references/markdown-to-notion-rich-text.md)）
 - **注意：翻译工作由 Claude 在构建 children blocks 时直接完成。不需要调用外部翻译 API。Claude 读取提取的英文内容后，直接输出翻译后的中文段落，然后写入 Notion blocks。**
 
 ### Step 1：抓取内容
 
 按网站类型选择抓取方式（详见 [references/site-adapters.md](references/site-adapters.md)）：
 
-**通用网站（优先 curl）：**
+**通用网站（优先 opencli web read）：**
+
 ```bash
-curl -sL --max-time 15 -H "User-Agent: Mozilla/5.0" "<URL>" -o /tmp/article_raw.html
+mkdir -p /tmp/article_<id>
+opencli web read --url "<URL>" --output /tmp/article_<id>
+# 输出目录结构：/tmp/article_<id>/<title>/<title>.md
+# 图片目录：/tmp/article_<id>/<title>/images/
 ```
 
+微信公众号、少数派、知乎等需要 JS 渲染的站点，统一用 `opencli web read`；curl 直接抓大概率返回验证页或内容残缺。
+
 **回退方案（按优先级）：**
-1. `opencli web article "<URL>" -f json` — 支持 JS 渲染
+1. `opencli web read --url "<URL>" --output /tmp/article_<id>` — 支持 JS 渲染，自动下载图片
 2. `agent-browser open "<URL>"` + `get text body --json` — 需要 playwright 已安装
 3. `curl` — 仅适用于非 JS 渲染页面
 
@@ -937,13 +944,14 @@ curl -s -X POST "https://api.notion.com/v1/databases/6f7bb9cc-ac01-41c5-9856-fb1
 
 ### Step 2：提取页面信息
 
-使用 WebFetch 或 curl 抓取 URL 页面，提取工具信息：
+优先使用 `opencli web read` 抓取页面（支持 JS 渲染，自动下载图片）：
 
 ```bash
-curl -sL --max-time 15 -H "User-Agent: Mozilla/5.0" "$TOOL_URL" -o /tmp/tool_page.html
+mkdir -p /tmp/tool_<id>
+opencli web read --url "$TOOL_URL" --output /tmp/tool_<id>
 ```
 
-按域名规则提取（详见 [references/extraction-rules.md](references/extraction-rules.md)）：
+按域名规则提取（详见 [references/extraction-rules.md](references/extraction-rules.md) 和 [references/site-adapters.md](references/site-adapters.md)）：
 
 | 来源 | 提取内容 |
 |------|---------|
@@ -951,6 +959,12 @@ curl -sL --max-time 15 -H "User-Agent: Mozilla/5.0" "$TOOL_URL" -o /tmp/tool_pag
 | Chrome Web Store | 扩展名、描述 → 类型：浏览器插件 |
 | npm/PyPI | 包名、description → 类型：工具包 |
 | 官网/SaaS | 站名、hero 描述 → 类型：网站 |
+
+**大页面/入口型站点处理**：
+- 如果抓取到的 Markdown 超过 20KB（例如代码库百科、文档聚合站），不要全文写入工具箱。
+- 只提取：一句话简介 + 使用方式 + 适用场景 + 核心功能。
+- 正文里**跳过图片、视频、架构图**，只保留文字和链接。
+- 工具箱卡片的目标是可快速判断“这个工具是什么、怎么用”，不是归档原文。
 
 ### Step 3：选择图标
 
@@ -975,6 +989,11 @@ curl -sL --max-time 15 -H "User-Agent: Mozilla/5.0" "$TOOL_URL" -o /tmp/tool_pag
 | 浏览器插件 | 安装方式 → 使用技巧 → 隐私设置 → 冲突排查 |
 | Prompt | 使用场景 → 优化技巧 → 变量设置 → 效果对比 |
 | 工具包 | 安装命令 → 基础用法 → 进阶配置 → 版本兼容 |
+
+生成正文时：
+- 优先使用 `opencli web read` 抓取到的真实内容，不要编造功能点；
+- 如果内容里有 Markdown 链接 `[文字](URL)` 或 `**加粗**`，必须转成 Notion rich_text 格式（参考 [references/markdown-to-notion-rich-text.md](references/markdown-to-notion-rich-text.md)）；
+- 入口型/百科型页面只做摘要，不要堆全文。
 
 ### Step 5：创建页面（含封面和图标）
 
