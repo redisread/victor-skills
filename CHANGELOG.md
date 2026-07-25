@@ -136,6 +136,18 @@
 
 ### notion-zettelkasten
 
+#### [1.1.6] - 2026-07-25
+- 优化 X/Twitter 保存流程：明确优先用 `opencli twitter article` + `opencli twitter download`，移除失效的 `timeout` 包装
+- 补充 X/Twitter 图片处理：opencli 下载的媒体用 `file_upload`，fxtwitter 返回的 `pbs.twimg.com` URL 用 `external`
+- 完善 X/Twitter 回退路径：普通推文用 `.tweet.text`/`.tweet.media`，X Article 用 `.tweet.article.*`
+- 微信公众号抓取统一改为 `opencli web read --url ... --output ...`，移除无效的 `opencli web article` 命令，明确输出 Markdown 与本地 `images/` 目录
+
+#### [1.1.5] - 2026-07-25
+- 功能 13（URL 保存到工具箱）新增大页面/入口型站点摘要规则，提取核心功能点与适用场景，不再硬编码具体站点类型
+- 功能 12（URL 保存到文献笔记）内联 Markdown 格式必须转成 Notion `rich_text`：`[文字](URL)` → 可点击链接，`**加粗**` → bold，`*斜体*` → italic
+- 通用网站抓取统一优先使用 `opencli web read`（支持 JS 渲染、自动下载图片），微信公众号等强反爬站点不再依赖裸 `curl`
+- 清理 Codewiki 相关描述：Codewiki 不再作为通用分类或站点类型出现在工具箱提取与适配规则中
+
 #### [1.1.4] - 2026-07-22
 - 功能 12（URL 保存到文献笔记）优化图片插入位置：优先按原始结构穿插，无精确位置时按段落均匀分布
 - 新增 X Article（fxtwitter）精确位置解析：通过 `atomic` block + `entityMap` 中的 `MEDIA` 实体定位图片

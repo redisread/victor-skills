@@ -1,7 +1,7 @@
 ---
 name: notion-zettelkasten
 description: "Notion 卡片盒笔记系统（Zettelkasten）管理工具。支持查询和创建文献笔记、灵感笔记、永久笔记（含正文），查询/创建/删除工具箱，URL保存工具到工具箱，查询领域，URL保存文章到文献笔记。触发词：文献笔记、灵感笔记、永久笔记、卡片笔记、工具箱、领域查询、记笔记、记灵感、收集文献、保存文章、保存工具、url-to-notion、zettelkasten、保存文章到 Notion、裁剪文章、保存到整理笔记、保存这个工具、添加到工具箱、收藏这个链接、save this tool、add to toolbox。当用户提到 Notion 笔记的查询、创建、删除或 URL 保存时使用。"
-version: 1.1.5
+version: 1.1.6
 metadata:
   homepage: https://github.com/victor-skills#notion-zettelkasten
 
@@ -477,16 +477,29 @@ opencli web read --url "<URL>" --output /tmp/article_<id>
 
 **X/Twitter：**
 ```bash
-# 优先 opencli twitter
-~/.nvm/versions/node/v25.3.0/bin/opencli twitter article "<X URL>" -f json > /tmp/x_article.json
+# 优先 opencli twitter（不要包 timeout，部分环境没有该命令）
+opencli twitter article "<X URL>" -f json > /tmp/x_article.json
 
-# 回退 fxtwitter API（获取文章结构和图片）
-curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_article.json
-# 文章正文在 .tweet.article.content.blocks[]
-# 封面图在 .tweet.article.cover_media.media_info.original_img_url
-# 内容图片在 .tweet.article.media_entities[].media_info.original_img_url
-# 图片位置：类型为 "atomic" 的 block，通过 entityMap 中的 MEDIA 实体关联到 media_id
+# 抓取图片/附件（需要 opencli 已登录 Twitter）
+opencli twitter download --tweet-url "<X URL>" -f json --output /tmp/x_dl
 ```
+
+- `opencli twitter article` 返回列表，普通推文/线程在 `content`，X Article 含 `title` + 完整正文
+- `opencli twitter download` 把媒体存到 `/tmp/x_dl/tweets/`，本地可直接读取
+
+**回退 fxtwitter API**（opencli 不可用时）：
+
+```bash
+curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_article.json
+```
+
+- 普通推文：正文在 `.tweet.text`，媒体在 `.tweet.media.all[].url`
+- X Article：正文在 `.tweet.article.content.blocks[]`；封面图在 `.tweet.article.cover_media.media_info.original_img_url`；内容图片在 `.tweet.article.media_entities[].media_info.original_img_url`；图片位置通过 `atomic` block + `entityMap` 中的 `MEDIA` 实体关联到 `media_id`
+
+**微信公众号：**
+
+微信公众号文章需要浏览器渲染，curl 经常被拦截。推荐用 `agent-browser` 获取渲染后的 HTML，再按 `references/site-adapters.md` 的「微信公众号」章节解析。
+解析脚本：`references/scripts/wechat-parser.py`。微信图片有防盗链，需下载后通过 Files API 上传为 `file_upload`。
 
 **记录图片位置（强烈建议）：**
 
@@ -506,55 +519,9 @@ curl -sL "https://api.fxtwitter.com/<username>/status/<tweet_id>" -o /tmp/fx_art
 
 **X/Twitter 图片处理：**
 
-fxtwitter 返回的图片 URL 来自 pbs.twimg.com，本地环境可能无法直接下载。
-使用 Notion `external` 图片类型，让 Notion 直接从 URL 加载，无需本地下载上传。
-
-同时要解析 `atomic` block 获取图片在正文中的精确位置：
-
-```python
-import json
-
-with open("/tmp/fx_article.json") as f:
-    data = json.load(f)
-
-article = data.get("tweet", {}).get("article", {})
-content = article.get("content", {})
-blocks = content.get("blocks", [])
-entity_map = {e["key"]: e["value"] for e in content.get("entityMap", [])}
-
-# media_id -> URL
-media_id_to_url = {
-    str(m.get("media_id")): m["media_info"]["original_img_url"]
-    for m in article.get("media_entities", [])
-    if m.get("media_info", {}).get("original_img_url")
-}
-
-image_positions = []  # list of (block_index, url)
-text_block_index = 0
-
-for raw_idx, b in enumerate(blocks):
-    if b.get("type") == "atomic":
-        for er in b.get("entityRanges", []):
-            ent = entity_map.get(str(er["key"]), {})
-            if ent.get("type") == "MEDIA":
-                for item in ent.get("data", {}).get("mediaItems", []):
-                    mid = str(item.get("mediaId", ""))
-                    url = media_id_to_url.get(mid)
-                    if url:
-                        # 图片应插入在第 text_block_index 个文本块之后
-                        image_positions.append((text_block_index - 1, url))
-    elif b.get("text", "").strip():
-        text_block_index += 1
-
-# 封面图单独处理
-cover_url = article.get("cover_media", {}).get("media_info", {}).get("original_img_url", "")
-
-# 内容图片按位置包装成 image 对象
-content_images = [
-    {"url": url, "block_index": idx}
-    for idx, url in image_positions
-]
-```
+- `opencli twitter download` 下载到本地的媒体 → 使用 `file_upload` image block
+- fxtwitter 返回的 `pbs.twimg.com` URL → 本地可能不可达，使用 `external` image block，让 Notion 直接加载
+- 第一张图片作封面；其余按原文顺序（或 `block_index`）插入正文
 
 **图片类型选择策略：**
 
