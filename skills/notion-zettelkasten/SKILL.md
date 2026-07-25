@@ -959,10 +959,9 @@ opencli web read --url "$TOOL_URL" --output /tmp/tool_<id>
 | Chrome Web Store | 扩展名、描述 → 类型：浏览器插件 |
 | npm/PyPI | 包名、description → 类型：工具包 |
 | 官网/SaaS | 站名、hero 描述 → 类型：网站 |
-| Codewiki (`codewiki.google/github.com/...`) | 工具名：`Code Wiki — owner/repo 代码百科`；简介：项目概述 1-2 句；用法：URL 替换规则；类型：网站；标签：开发工具/代码阅读/GitHub |
 
 **大页面/入口型站点处理**：
-- 如果抓取到的 Markdown 超过 20KB（例如 Codewiki 的全仓库百科），不要全文写入工具箱。
+- 如果抓取到的 Markdown 超过 20KB（例如代码库百科、文档聚合站），不要全文写入工具箱。
 - 只提取：一句话简介 + 使用方式 + 适用场景 + 核心功能。
 - 正文里**跳过图片、视频、架构图**，只保留文字和链接。
 - 工具箱卡片的目标是可快速判断“这个工具是什么、怎么用”，不是归档原文。
