@@ -52,6 +52,13 @@
 
 ### r2-uploader
 
+#### [1.2.0] - 2026-07-26
+- 默认走 Cloudflare R2 REST API（`PUT /accounts/{id}/r2/buckets/{name}/objects/{key}`），不再依赖 wrangler 鉴权
+- wrangler CLI 仅作兜底；提示 `--remote` 在 Account API Token 模式下会报 `Authentication failed [code: 9106]`，此时走 REST API 即可
+- 新增 `$R2_ACCOUNT_ID` 必需环境变量，从 `~/.config/cloudflare/env.sh` 加载
+- `references/error-handling.md` 新增 Cloudflare 缓存陷阱（`cf-cache-status: HIT` 时需手动 DELETE 后再 PUT）
+- `references/advanced.md` 重写为 REST API 批量/并发上传示例 + 单文件 `upload_to_r2` shell 函数
+
 #### [1.1.0] - 2026-06-20
 - 技能库整理：优化 SKILL.md 结构
 - CR 修复：统一 API 版本

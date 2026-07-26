@@ -48,7 +48,7 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 
 | 技能 | 版本 | 描述 |
 |------|------|------|
-| `r2-uploader` | 1.1.0 | 上传文件到 Cloudflare R2 对象存储 |
+| `r2-uploader` | 1.2.0 | 上传文件到 Cloudflare R2 对象存储（默认 REST API，wrangler 兜底） |
 
 ## 许可证
 
