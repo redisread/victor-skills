@@ -59,6 +59,15 @@
 - `references/error-handling.md` 新增 Cloudflare 缓存陷阱（`cf-cache-status: HIT` 时需手动 DELETE 后再 PUT）
 - `references/advanced.md` 重写为 REST API 批量/并发上传示例 + 单文件 `upload_to_r2` shell 函数
 
+---
+
+### raft-article-illustrator
+
+#### [6.1.0] - 2026-07-28
+- 新增「图片插入规则」章节：明确图片必须按 `**位置**` 标注插入到原文章正确章节之后，而非集中在文章末尾
+- 执行流程新增 Step 5「组装文章」，强制要求把生成的图片按结构插入
+- 自检清单新增一项：图片位置是否与文章结构一致
+
 #### [1.1.0] - 2026-06-20
 - 技能库整理：优化 SKILL.md 结构
 - CR 修复：统一 API 版本
