@@ -50,6 +50,30 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 |------|------|------|
 | `r2-uploader` | 1.2.0 | 上传文件到 Cloudflare R2 对象存储（默认 REST API，wrangler 兜底） |
 
+## 外部依赖技能
+
+以下技能不是本仓库维护的，而是从远程 GitHub 仓库引用的外部依赖。仓库只记录依赖来源（见 `skills-lock.json`），不复制技能本体，安装从上游拉取。
+
+| 技能 | 来源 | 描述 |
+|------|------|------|
+| `book-to-skill` | [virgiliojr94/book-to-skill](https://github.com/virgiliojr94/book-to-skill) | 把书籍/文档（PDF、EPUB、DOCX 等）蒸馏成结构化 Agent Skill |
+
+**恢复外部依赖**（在新环境/机器上，先 clone 本仓库再执行）：
+
+```bash
+npx skills experimental_install
+```
+
+该命令读取 `skills-lock.json`（只含 `sourceType: github` 的外部依赖条目），从上游仓库重新拉取并安装。
+
+**添加新的外部依赖**：
+
+```bash
+npx skills add <owner/repo> --skill <skill-name> --agent claude-code -y
+```
+
+安装后 `skills-lock.json` 会自动记录该技能的 `sourceType: github` 条目。提交 lock 文件即完成「收纳依赖」，技能本体不进入本仓库。
+
 ## 许可证
 
 MIT
