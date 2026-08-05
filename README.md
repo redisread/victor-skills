@@ -31,6 +31,7 @@ Victor 的 Claude Code Skill 集合，用于提升日常开发效率。
 |------|------|------|
 | `raft-article-illustrator` | 6.1.0 | 极简手绘风格插图提示词——用类比而非图解，输出中文提示词可直接用于 Midjourney / Gemini / DALL-E |
 | `raft-essay` | 1.6.0 | 撰写工程哲学风格的长文，聚焦 AI Agent 协作与人机边界 |
+| `tech-article-rewriter` | 1.0.0 | 将英文报告、机器翻译稿、会议或直播转写编译成高密度、自然的中文科技文章 |
 
 ### 产品设计
 
